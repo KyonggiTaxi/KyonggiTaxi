@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>방 만들기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nanum Gothic', sans-serif;
+      background: linear-gradient(rgb(202, 227, 246));
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .card {
+      background: #e8f0ff;
+      border-radius: 28px;
+      border: 2.5px solid #7ba7c7;
+      padding: 28px 24px 32px;
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(100, 130, 220, 0.18);
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .mascot {
+      background-image: url("images/기룡.png");
+      position: absolute;
+      top: -35px;
+      right: -30px;
+      width: 105px;
+      height: 180px;
+      background-size: cover;
+      pointer-events: none;
+    }
+
+    .title-btn {
+      display: block;
+      text-align: center;
+      background: #8ba5d8;
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 6px;
+      padding: 12px 32px;
+      border-radius: 16px;
+      margin-bottom: 22px;
+      margin-top: 16px;
+      box-shadow: 0 3px 10px rgba(100,130,210,0.25);
+    }
+
+    /* =====================
+       지도 영역 핵심 스타일
+    ===================== */
+    .map-area {
+      width: 100%;
+      height: 180px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 1.5px solid #a8c0e8;
+      background: #c5d8f0;
+      position: relative;
+    }
+
+    /* 카카오 roughmap이 생성하는 컨테이너 강제 크기 맞추기 */
+    .map-area .root_daum_roughmap {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* roughmap 내부 iframe 크기 강제 */
+    .map-area iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: none !important;
+      display: block;
+    }
+
+    /* roughmap 내부 불필요한 UI 숨기기 (하단 카카오 바) */
+    .map-area .wrap_controllers {
+      display: none !important;
+    }
+
+    /* 지도 위에 뜨는 링크 레이어 제거 */
+    .map-area .link_map {
+      display: none !important;
+    }
+
+    /* ===================== */
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .field-label {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #2a3a6e;
+      white-space: nowrap;
+      width: 80px;
+      display: inline-block;
+    }
+
+    .field-input {
+      flex: 1;
+      min-width: 0;
+      background: #f0f5ff;
+      border: 1.5px solid #b8ccf0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'Nanum Gothic', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #2a3a6e;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-input:focus {
+      border-color: #6080d8;
+      box-shadow: 0 0 0 3px rgba(96,128,216,0.15);
+    }
+    .field-input::placeholder { color: #aabce0; font-weight: 400; }
+
+    .slider-row { margin-bottom: 28px; }
+    .slider-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .slider-value-badge {
+      background: #3a5ab8;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 800;
+      border-radius: 8px;
+      padding: 2px 10px;
+    }
+
+    .slider-wrap { position: relative; padding: 0 4px; }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 6px;
+      background: linear-gradient(to right, #3a5ab8 0%, #3a5ab8 50%, #d0d8f0 50%, #d0d8f0 100%);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      border: 3px solid #3a5ab8;
+      box-shadow: 0 2px 6px rgba(58,90,184,0.25);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding: 0 10px; 
+    }
+
+    .tick {
+      width: 0; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.78rem;
+      color: #7090c0;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    
+    .tick::before {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 5px;
+      background: #a0b8e0;
+    }
+
+    .submit-btn {
+      display: block;
+      width: 100%;
+      background: linear-gradient(135deg, #2a4aa0, #3a5ab8);
+      color: #fff;
+      font-family: 'Nanum Gothic', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 8px;
+      border: none;
+      border-radius: 18px;
+      padding: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(42,74,160,0.35);
+      transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+    }
+    .submit-btn:hover {
+      background: linear-gradient(135deg, #1e3a8a, #2a4aa0);
+      box-shadow: 0 6px 22px rgba(42,74,160,0.45);
+      transform: translateY(-2px);
+    }
+    .submit-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(42,74,160,0.3); }
+
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #2a4aa0;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(42,74,160,0.35);
+      opacity: 0;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #bankSelect option[value=""] { color: #aabce0; }
+    #bankSelect { color: #aabce0; }
+    #bankSelect.selected { color: #2a3a6e; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="mascot"></div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; margin-top:16px; margin-right: 40px;">
+      <div class="title-btn" style="margin:0;">방 만들기</div>
+      <button onclick="window.location.href='mainPage.html'" style="background:#7ba7c7; color:white; border:none; border-radius:50%; width:36px; height:36px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; z-index:10;">✕</button>
+  </div>
+
+  <!-- =====================
+       카카오 지도퍼가기 삽입
+  ===================== -->
+  <div class="map-area">
+    <div id="daumRoughmapContainer1778030991341" class="root_daum_roughmap root_daum_roughmap_landing"></div>
+  </div>
+
+  <!-- 출발지 -->
+  <div class="field-row">
+    <span class="field-label">출발지</span>
+    <input class="field-input" type="text" id="roomFrom" placeholder="예) 수원역" maxlength="15"/>
+  </div>
+
+  <!-- 도착지 -->
+  <div class="field-row">
+    <span class="field-label">도착지</span>
+    <input class="field-input" type="text" id="roomTo" placeholder="예) 경기대" maxlength="15"/>
+  </div>
+
+  <!-- 방 제목 -->
+  <div class="field-row">
+    <span class="field-label">방제목</span>
+    <input class="field-input" type="text" id="roomTitle" placeholder="방 제목을 입력하세요" maxlength="30"/>
+  </div>
+
+  <!-- 계좌번호 -->
+<div class="field-row">
+    <span class="field-label">계좌번호</span>
+    <!-- 은행 선택 드롭다운 -->
+    <select class="field-input" id="bankSelect" style="flex: 0.4; margin-right: 5px; padding: 8px; font-weight:700; font-family:'Nanum Gothic',sans-serif;">
+      <option value="" disabled selected>은행선택</option>
+      <option value="카카오뱅크">카카오뱅크</option>
+      <option value="신한은행">신한은행</option>
+      <option value="국민은행">국민은행</option>
+      <option value="토스뱅크">토스뱅크</option>
+      <option value="농협은행">농협은행</option>
+      <option value="기타">기타</option>
+    </select>
+    <!-- 계좌번호 입력 (하이픈 제외) -->
+    <input class="field-input" type="text" id="accountNum" placeholder="하이픈(-) 제외 입력" maxlength="20" style="flex: 0.6;"/>
+  </div>
+
+  <!-- 인원 슬라이더 -->
+  <div class="slider-row">
+    <div class="slider-top" style="justify-content:space-between;">
+        <span class="field-label">인 원 (본인 포함)</span>
+        <span class="slider-value-badge" id="sliderVal">3명</span>
+    </div>
+    <div class="slider-wrap">
+      <input type="range" id="peopleSlider" min="2" max="6" value="2" step="1"/>
+      <div class="slider-ticks">
+        <div class="tick">2</div>
+        <div class="tick">3</div>
+        <div class="tick">4</div>
+        <div class="tick">5</div>
+        <div class="tick">6</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="submit-btn" onclick="handleSubmit()">생 성</button>
+</div>
+
+<div class="toast" id="toast">방이 생성되었습니다!</div>
+
+<!-- =====================
+     카카오 지도퍼가기 스크립트
+     (body 닫기 직전에 위치시켜야 안전)
+===================== -->
+<script charset="UTF-8" class="daum_roughmap_loader_script" src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js"></script>
+<script charset="UTF-8">
+  new daum.roughmap.Lander({
+    "timestamp" : "1778030991341",
+    "key"       : "mwckv4pr26i",
+    "mapWidth"  : "640",
+    "mapHeight" : "360"
+  }).render();
+</script>
+
+<script>
+  /* 슬라이더 */
+  const slider = document.getElementById('peopleSlider');
+  const sliderVal = document.getElementById('sliderVal');
+
+  function updateSlider() {
+    const val = parseFloat(slider.value);
+    const min = parseFloat(slider.min);
+    const max = parseFloat(slider.max);
+    
+    // 최소값이 0이 아닐 때의 올바른 백분율 계산식
+    const pct = ((val - min) / (max - min)) * 100;
+    
+    slider.style.background = 
+      `linear-gradient(to right, #3a5ab8 0%, #3a5ab8 ${pct}%, #d0d8f0 ${pct}%, #d0d8f0 100%)`;
+    sliderVal.textContent = val + '명';
+  }
+  slider.addEventListener('input', updateSlider);
+  updateSlider();
+
+  /* 계좌번호 자동 하이픈 */
+document.getElementById('accountNum').addEventListener('input', function() {
+  this.value = this.value.replace(/[^0-9]/g, ''); 
+});
+
+  /* 생성 버튼 */
+  function handleSubmit() {
+    const title   = document.getElementById('roomTitle').value.trim();
+    const account = document.getElementById('accountNum').value.trim();
+    const bank    = document.getElementById('bankSelect').value;
+    const people  = parseInt(slider.value);
+
+    if (!title)   { alert('방 제목을 입력해주세요!'); return; }
+    if (!account) { alert('계좌번호를 입력해주세요!'); return; }
+
+    // localStorage에서 기존 방 목록 불러오기
+    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+
+    // 새 방 객체 생성
+    const newRoom = {
+      id: Date.now(),
+      name: title,
+      from: document.getElementById('roomFrom').value.trim() || '출발지',
+      to: document.getElementById('roomTo').value.trim() || '도착지',
+      account: account,
+      bank:bank,
+      max: people,
+      cur: 1,
+      host: localStorage.getItem('nickname') || '택터',
+      members: [localStorage.getItem('nickname') || '택티'],
+      createdAt: new Date().toISOString()
+    };
+
+    rooms.push(newRoom);
+    localStorage.setItem('rooms', JSON.stringify(rooms));
+    localStorage.setItem('currentRoomId', newRoom.id);
+
+    const toast = document.getElementById('toast');
+    toast.textContent = '"' + title + '" 방이 생성되었습니다! (' + people + '명)';
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        window.location.href = "waitingRoomPage.html";
+    }, 800);
+  }
+  document.getElementById('bankSelect').addEventListener('change', function() {
+      this.classList.add('selected');
+      this.style.color = '#2a3a6e';
+  });
+</script>
+</body>
+</html>

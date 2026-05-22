@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>채팅방</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: rgb(202, 227, 246);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            max-height: 800px;
+            background: #d6e9f5;
+            border-radius: 30px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        /* 헤더 영역 */
+        .header {
+            background: linear-gradient(135deg, #a8d4f0 0%, #c5e3f6 100%);
+            border-radius: 15px;
+            padding: 16px;
+            margin-bottom: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+
+        .back-btn {
+            background: #5a8fb8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding:12px 18px;
+            font-size: 15px;
+            cursor: pointer;
+            line-height: 1.3;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .delete-btn {
+            background: #e05050;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            line-height: 1.3;
+            text-align: center;
+        }
+        .leave-btn {
+            background: #8a8a8a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 15px;
+            cursor: pointer;
+            line-height: 1.3;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .room-info {
+            flex: 1;
+            text-align: center;
+        }
+
+        .room-name {
+            font-weight: 600;
+            color: #3a6d8c;
+            font-size: 20px;
+        }
+
+        .room-route {
+            color: #5a8fb8;
+            font-size: 17px;
+            margin-top: 2px;
+        }
+
+        .account-info {
+            background: white;
+            border-radius: 10px;
+            padding: 10px 15px;
+            text-align: center;
+            color: #5a8fb8;
+            font-size: 14px;
+        }
+
+        /* 채팅 영역 */
+        .chat-area {
+            flex: 1;
+            background: #f0f7fc;
+            border-radius: 15px;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0;
+            justify-content: flex-start;
+        }
+
+        .message-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message-row.sent {
+            justify-content: flex-end;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #7ba7c7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .avatar svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+        }
+
+        .gogi {
+            font-size: 22px;
+            color: #a9c5da;
+            margin: auto;
+            text-align: center;
+        }
+
+        .bubble {
+            background: white;
+            border-radius: 15px;
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .message-row.sent .bubble {
+            background: #c5e3f6;
+        }
+
+        /* 입력 영역 */
+        .input-area {
+            margin-top: 10px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border-radius: 25px;
+            padding: 8px 15px;
+            margin-bottom: 10px;
+        }
+
+        .input-display {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            min-height: 20px;
+            word-break: break-all;
+        }
+
+        .send-btn {
+            width: 30px;
+            height: 30px;
+            background: #7ba7c7;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        /* 키보드 영역 */
+        .keyboard {
+            background: #f0f7fc;
+            border-radius: 15px;
+            padding: 10px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .keyboard-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .key {
+            flex: 1;
+            height: 45px;
+            background: white;
+            border: 2px solid #c5e3f6;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #5a8fb8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .key:active {
+            background: #c5e3f6;
+            transform: scale(0.95);
+        }
+
+      .key.mascot {
+            margin-left: 10px;
+            background: transparent;
+            background-image: url(images/채팅기룡.png);
+            border: none;
+            background-size: contain;
+            background-repeat: no-repeat;
+            font-size: 14px;
+            height: 50px;
+            width: 60px
+            
+        }
+
+
+        .key.mascot:active {
+            transform: scale(1.1);
+            background: transparent;
+        }
+
+        .key.action {
+            background: #daeef8;
+            color: #5a8fb8;
+            border-color: #c5e3f6;
+        }
+
+        .key.toggle {
+            background: #b8d8ee;
+            color: #5a8fb8;
+            border-color: #9ec4e0;
+        }
+
+        .key.action svg {
+            width: 20px;
+            height: 20px;
+            fill: #5a8fb8;
+        }
+
+        .key.toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: #5a8fb8;
+        }
+
+        /* 마스코트 */
+        .mascot-icon {
+            font-size: 24px;
+        }
+
+        /* 팝업 오버레이 */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: fadeIn 0.15s ease;
+        }
+
+        .popup-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popUp {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .popup-box {
+            background: #1e3a6e;
+            border-radius: 20px;
+            width: 280px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: popUp 0.2s ease;
+            position: relative;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            background: #e05c5c;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .popup-avatar-area {
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px 20px;
+        }
+
+        .popup-avatar-circle {
+            width: 110px;
+            height: 110px;
+            background: #2d5096;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-avatar-circle svg {
+            width: 70px;
+            height: 70px;
+            fill: #7ba7c7;
+        }
+
+        .popup-message {
+            background: #2d5096;
+            margin: 0 15px 15px;
+            border-radius: 12px;
+            padding: 14px 16px;
+            text-align: center;
+            color: white;
+            font-size: 15px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 0 15px 18px;
+        }
+
+        .popup-btn {
+            flex: 1;
+            height: 46px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.1s;
+        }
+
+        .popup-btn:active {
+            transform: scale(0.96);
+            opacity: 0.85;
+        }
+
+        .popup-btn.back {
+            background: #e05c5c;
+            color: white;
+        }
+
+        .popup-btn.kick {
+            background: #e05c5c;
+            color: white;
+        }
+
+        /* 퇴출 후 이동 선택 팝업 */
+        .choice-box {
+            background: #1e3a6e;
+            border-radius: 20px;
+            width: 280px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: popUp 0.2s ease;
+            padding: 24px 18px 20px;
+            text-align: center;
+        }
+
+        .choice-title {
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .choice-subtitle {
+            color: #8ab0d4;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .choice-btn {
+            flex: 1;
+            height: 46px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .choice-btn:active {
+            transform: scale(0.96);
+        }
+
+        .choice-btn.chat {
+            background: #5a8fb8;
+            color: white;
+        }
+
+        .choice-btn.lobby {
+            background: #e05c5c;
+            color: white;
+        }
+
+        /* 스크롤바 스타일링 */
+        .chat-area::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chat-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #c5e3f6;
+            border-radius: 5px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 420px) {
+            body {
+                padding: 0;
+            }
+            
+            .phone-container {
+                border-radius: 0;
+                height: 100vh;
+                max-height: none;
+            }
+
+            .key {
+                height: 42px;
+                font-size: 14px;
+            }
+
+            .key.sm  { flex: 0.6; font-size: 14px; }
+            .key.md  { flex: 1; }
+            .key.lg  { flex: 1.5; font-size: 14px; }
+            .key.xl  { flex: 1.8; font-size: 13px; }
+        }
+
+        .info-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #7ba7c7;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(90,143,184,0.3);
+        }
+        .info-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 20;
+            border-radius: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+        .info-overlay.open { display: flex; }
+        .info-box {
+            background: #f0f7fc;
+            border-radius: 16px;
+            width: 90%;
+            max-height: 85%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-hint {
+            font-size: 11px;
+            color: #7ba7c7;
+            font-weight: 600;
+        }
+
+        .info-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 14px 10px;
+            background: #f0f7fc;
+            border-radius: 16px 16px 0 0;
+            border-bottom: 1.5px solid #d0e8f5;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .info-box-scroll {
+            overflow-y: auto;
+            padding: 12px 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .info-box-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #3a6d8c;
+        }
+        .info-close {
+            background: #7ba7c7;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .ex-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .ex-row.right { align-items: flex-end; }
+        .ex-row.left  { align-items: flex-start; }
+        .ex-name {
+            font-size: 10px;
+            color: #7ba7c7;
+            font-weight: 600;
+            padding: 0 4px;
+        }
+        .ex-bubble {
+            font-size: 12px;
+            padding: 7px 11px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+        .ex-row.right .ex-bubble { background: #c5e3f6; color: #2b4e8f; }
+        .ex-row.left  .ex-bubble { background: white;   color: #333; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="header-top" style="flex-wrap:nowrap; align-items:center;">
+                <button class="back-btn" onclick="window.location.href='waitingRoomPage.html'">대기실</button>
+                <div class="room-info" style="text-align:center; flex:1; min-width:0;">
+                    <div class="room-name">
+                        <span id="chatRoomName">방이름</span>
+                        <span id="chatRoomCount" style="color:#4a8ab0;font-size:13px;margin-left:6px;">(1/4)</span>
+                    </div>
+                    <div id="chatRoomRoute" style="font-size:clamp(11px,2.5vw,17px); font-weight:600; color:#3a6d8c; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="toggleRoute()"></div>
+                </div>
+                <div id="roomActionBtn" style="display:flex; gap:6px; flex-shrink:0;"></div>
+            </div>
+        </div>
+
+        <!-- 채팅 영역 -->
+        <div class="chat-area" id="chatArea">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 8px; position:sticky; top:0; z-index:20; background:#f0f7fc; flex-shrink:0;">
+                <span style="flex:1; text-align:center; font-size:13px; color:#7ba7c7; font-weight:700;" id="accountHint"></span>
+                <button class="info-btn" style="position:static; flex-shrink:0;" onclick="openInfo()">?</button>
+            </div>
+            <div class="gogi">자유롭게 대화를 시작하여 보세요!!</div>
+
+            <div class="info-overlay" id="infoOverlay">
+                <div class="info-box">
+                    <div class="info-box-header">
+                        <span class="info-box-title">💬 예시 대화</span>
+                        <span class="info-hint">기룡이를 누르면 띄어쓰기가 돼요!</span>
+                        <button class="info-close" onclick="closeInfo()">✕</button>
+                    </div>
+                    <div class="info-box-scroll">
+                        <div class="ex-row right">
+                            <span class="ex-name">택터</span>
+                            <div class="ex-bubble">택시 도착 3분 전</div>
+                        </div>
+                        <div class="ex-row right">
+                            <div class="ex-bubble">도착 몇 분 전?</div>
+                        </div>
+                        <div class="ex-row left">
+                            <span class="ex-name">택티2</span>
+                            <div class="ex-bubble">곧 도착 1분 전</div>
+                        </div>
+                        <div class="ex-row left">
+                            <span class="ex-name">택티1</span>
+                            <div class="ex-bubble">번호판 몇 ?</div>
+                        </div>
+                        <div class="ex-row right">
+                            <span class="ex-name">택터</span>
+                            <div class="ex-bubble">1234</div>
+                        </div>
+                        <div class="ex-row left">
+                            <span class="ex-name">택티2</span>
+                            <div class="ex-bubble">도착 완료</div>
+                        </div>
+                        <div class="ex-row right">
+                            <span class="ex-name">택터</span>
+                            <div class="ex-bubble">총금액 5600원</div>
+                        </div>
+                        <div class="ex-row right">
+                            <div class="ex-bubble">1400원 송금 요망</div>
+                        </div>
+                        <div class="ex-row left">
+                            <span class="ex-name">택티1</span>
+                            <div class="ex-bubble">송금 완료</div>
+                        </div>
+                        <div class="ex-row left">
+                            <span class="ex-name">택티3</span>
+                            <div class="ex-bubble">송금 완료</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 입력 영역 -->
+        <div class="input-area">
+            <div class="input-row">
+                <div class="input-display" id="inputDisplay"></div>
+                <button class="send-btn" onclick="sendMessage()">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+            </div>
+
+            <!-- 텍스트 키보드 -->
+            <div class="keyboard" id="textKeyboard">
+                <div class="keyboard-row">
+                    <button class="key xl"  onclick="addText('총금액')">총금액</button>
+                    <button class="key sm"  onclick="addText('원')">원</button>
+                    <button class="key lg"  onclick="addText('송금')">송금</button>
+                    <button class="key action" onclick="deleteText()">←</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key sm"  onclick="addText('곧')">곧</button>
+                    <button class="key md"  onclick="addText('도착')">도착</button>
+                    <button class="key lg"  onclick="addText('완료')">완료</button>
+                    <button class="key lg"  onclick="addText('확인')">확인</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key md"  onclick="addText('택시')">택시</button>
+                    <button class="key xl"  onclick="addText('번호판')">번호판</button>
+                    <button class="key md"  onclick="addText('요망')">요망</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key sm"  onclick="addText('몇')">몇</button>
+                    <button class="key sm"  onclick="addText('분')">분</button>
+                    <button class="key sm"  onclick="addText('전')">전</button>
+                    <button class="key sm"  onclick="addText('?')">?</button>
+                    <button class="key mascot" onclick="addText(' ')"></button>
+                    <button class="key toggle" onclick="toggleKeyboard()">
+                        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 숫자 키보드 -->
+            <div class="keyboard" id="numberKeyboard" style="display:none;">
+                <div class="keyboard-row">
+                    <button class="key md" onclick="addText('1')">1</button>
+                    <button class="key md" onclick="addText('2')">2</button>
+                    <button class="key md" onclick="addText('3')">3</button>
+                    <button class="key action" onclick="deleteText()">←</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key md" onclick="addText('4')">4</button>
+                    <button class="key md" onclick="addText('5')">5</button>
+                    <button class="key md" onclick="addText('6')">6</button>
+                    <button class="key md" onclick="addText('0')">0</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key md" onclick="addText('7')">7</button>
+                    <button class="key md" onclick="addText('8')">8</button>
+                    <button class="key md" onclick="addText('9')">9</button>
+                    <button class="key toggle" onclick="toggleKeyboard()">
+                        <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z"/></svg>
+                    </button>
+                </div>
+            </div>
+    </div>
+
+    <!-- 강제 퇴출 확인 팝업 -->
+    <div class="popup-overlay hidden" id="kickOverlay">
+        <div class="popup-box">
+            <button class="popup-close" onclick="closeKickPopup()">✕</button>
+            <div class="popup-avatar-area">
+                <div class="popup-avatar-circle">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+            </div>
+            <div class="popup-message" id="kickMessage">
+                강제 탈퇴 시킬까요?!
+            </div>
+            <div class="popup-buttons">
+                <button class="popup-btn back" onclick="closeKickPopup()">돌아가기</button>
+                <button class="popup-btn kick" onclick="doKick()">강제 탈퇴</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 퇴출 후 이동 선택 팝업 -->
+    <div class="popup-overlay hidden" id="choiceOverlay">
+        <div class="choice-box">
+            <div class="choice-title">퇴출 완료!</div>
+            <div class="choice-subtitle" id="kickedName"></div>
+            <div class="choice-buttons">
+                <button class="choice-btn chat" onclick="goToChat()">채팅방 유지</button>
+                <button class="choice-btn lobby" onclick="goToLobby()">대기실 이동</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── 방 정보 불러오기 ──
+        function loadRoomInfo() {
+            const roomId = localStorage.getItem('currentRoomId');
+            const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+            const room = rooms.find(r => String(r.id) === String(roomId));
+            if (room) {
+                document.getElementById('chatRoomName').textContent = room.name || '방이름';
+                document.getElementById('chatRoomRoute').textContent = (room.from || '출발지') + ' → ' + (room.to || '도착지');
+                const ah = document.getElementById('accountHint');
+                if (ah) ah.textContent = (room.bank || '') + ' ' + (room.account || '');
+                document.getElementById('chatRoomCount').textContent = '(' + (room.cur || 1) + '/' + (room.max || 4) + ')';
+                document.getElementById('chatRoomCount').style.fontSize = '17px';
+            }
+            const nickname = localStorage.getItem('nickname') || '';
+            const isHost = nickname === room.host;
+            const backBtn = document.querySelector('.back-btn');
+            const btnArea = document.getElementById('roomActionBtn');
+            if (btnArea) {
+                btnArea.innerHTML = isHost
+                    ? `<div style="display:flex; flex-direction:column; gap:6px;">
+                        <button class="delete-btn" onclick="deleteRoom()">방 삭제</button>
+                        <button class="delete-btn" onclick="openKickPopup()">강제 퇴출</button>
+                    </div>`
+                    : `<button class="leave-btn" onclick="leaveRoom()">나가기</button>`;
+            }
+        }
+        loadRoomInfo();
+
+        let currentKickTarget = null;
+
+        function openKickPopup(name) {
+            currentKickTarget = name;
+            document.getElementById('kickMessage').innerHTML =
+                `<strong>${name}</strong>을(를) 강제 탈퇴시킬까요?!`;
+            document.getElementById('kickOverlay').classList.remove('hidden');
+        }
+
+        function closeKickPopup() {
+            document.getElementById('kickOverlay').classList.add('hidden');
+            currentKickTarget = null;
+        }
+
+        function doKick() {
+            if (!currentKickTarget) return;
+            // 해당 유저의 메시지 그룹 제거
+            const group = document.getElementById(`group-${currentKickTarget}`);
+            if (group) group.remove();
+
+            // 시스템 메시지 추가
+            const chatArea = document.getElementById('chatArea');
+            const notice = document.createElement('div');
+            notice.style.cssText = 'text-align:center; font-size:12px; color:#8ab0d4; padding:4px 0;';
+            notice.textContent = `${currentKickTarget}님이 강제 퇴출되었습니다.`;
+            chatArea.appendChild(notice);
+
+            document.getElementById('kickedName').textContent = `${currentKickTarget}님이 퇴출되었습니다`;
+            document.getElementById('kickOverlay').classList.add('hidden');
+            document.getElementById('choiceOverlay').classList.remove('hidden');
+        }
+
+        function goToChat() {
+            document.getElementById('choiceOverlay').classList.add('hidden');
+            currentKickTarget = null;
+        }
+
+        function goToLobby() {
+            document.getElementById('choiceOverlay').classList.add('hidden');
+            currentKickTarget = null;
+            window.location.href = 'waitingRoomPage.html';
+        }
+
+        
+        let currentText = '';
+        let isTextKeyboard = true;
+
+        function addText(text) {
+            const gogi = document.querySelector('.gogi');
+            if (gogi) gogi.remove();
+            currentText += text;
+            document.getElementById('inputDisplay').textContent = currentText;
+        }
+
+        function toggleKeyboard() {
+            const textKeyboard = document.getElementById('textKeyboard');
+            const numberKeyboard = document.getElementById('numberKeyboard');
+            
+            if (isTextKeyboard) {
+                textKeyboard.style.display = 'block';
+                numberKeyboard.style.display = 'none';
+            } else {
+                textKeyboard.style.display = 'none';
+                numberKeyboard.style.display = 'block';
+            }
+            isTextKeyboard = !isTextKeyboard;
+        }
+
+        function sendMessage() {
+            if (currentText.trim() === '') return;
+
+            const chatArea = document.getElementById('chatArea');
+            
+            const messageGroup = document.createElement('div');
+            messageGroup.className = 'message-group';
+            
+            const messageRow = document.createElement('div');
+            messageRow.className = 'message-row sent';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = currentText;
+            
+            messageContent.appendChild(bubble);
+            messageRow.appendChild(messageContent);
+            messageGroup.appendChild(messageRow);
+            chatArea.appendChild(messageGroup);
+
+            // 스크롤 아래로
+            setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 50);
+
+            // 입력창 초기화
+            currentText = '';
+            document.getElementById('inputDisplay').textContent = '';
+        }
+
+        // 백스페이스 기능
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                currentText = currentText.slice(0, -1);
+                document.getElementById('inputDisplay').textContent = currentText;
+            }
+        });
+
+        function deleteText() {
+            if (currentText.length > 0) {
+                currentText = currentText.slice(0, -1);
+                document.getElementById('inputDisplay').textContent = currentText;
+            }
+        }
+        function deleteRoom() {
+            if (!confirm('방을 삭제하면 모든 인원이 퇴장됩니다. 삭제하시겠습니까?')) return;
+            const roomId = localStorage.getItem('currentRoomId');
+            let rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+            rooms = rooms.filter(r => String(r.id) !== String(roomId));
+            localStorage.setItem('rooms', JSON.stringify(rooms));
+            localStorage.removeItem('currentRoomId');
+            window.location.href = 'mainPage.html';
+        }
+
+        function leaveRoom() {
+            if (!confirm('방에서 나가시겠습니까?')) return;
+            const roomId = localStorage.getItem('currentRoomId');
+            const nickname = localStorage.getItem('nickname') || '';
+            let rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+            const room = rooms.find(r => String(r.id) === String(roomId));
+            if (room) {
+                room.members = (room.members || []).filter(m => m !== nickname);
+                room.cur = Math.max(1, (room.cur || 1) - 1);
+                localStorage.setItem('rooms', JSON.stringify(rooms));
+            }
+            localStorage.removeItem('currentRoomId');
+            window.location.href = 'mainPage.html';
+        }
+
+        function openInfo()  { document.getElementById('infoOverlay').classList.add('open'); }
+        function closeInfo() { document.getElementById('infoOverlay').classList.remove('open'); }
+        let routeExpanded = false;
+        function toggleRoute() {
+            const el = document.getElementById('chatRoomRoute');
+            routeExpanded = !routeExpanded;
+            el.style.whiteSpace = routeExpanded ? 'normal' : 'nowrap';
+            el.style.overflow = routeExpanded ? 'visible' : 'hidden';
+            el.style.textOverflow = routeExpanded ? 'unset' : 'ellipsis';
+        }
+    </script>
+</body>
+</html>

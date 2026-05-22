@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>택시팟 - 방 목록</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{
+      font-family:'Noto Sans KR',sans-serif;
+      background:#dce8f5;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+    }
+    .app{
+      width:100%;max-width:420px;min-height:100vh;
+      background:#dce8f5;display:flex;flex-direction:column;
+    }
+
+    /* 네비바 */
+    .navbar{
+      background:#8aafd6;
+      padding:28px 20px;
+      display:flex;align-items:center;justify-content:space-between;
+      position:relative;
+    }
+    .nav-left{display:flex;align-items:center;gap:10px;}
+    .icon-btn{
+      width:48px;height:48px;border-radius:50%;
+      background:#d0e4f5;border:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:background 0.2s;
+    }
+    .icon-btn:hover{background:#b8d2ec;}
+    .icon-btn svg{width:24px;height:24px;fill:#2b4e8f;}
+    .make-btn{
+      background:white;color:#2b4e8f;
+      font-family:'Noto Sans KR',sans-serif;
+      font-size:16px;font-weight:700;letter-spacing:4px;
+      padding:12px 24px;border-radius:24px;border:none;cursor:pointer;
+      transition:background 0.2s;
+    }
+    .make-btn:hover{background:#eef4fb;}
+
+    /* 공지 말풍선 */
+    .notice-bubble{
+      display:none;
+      position:absolute;top:68px;left:14px;
+      background:white;border:2px solid #8aafd6;
+      border-radius:16px;padding:14px 18px;width:285px;
+    }
+    .notice-bubble::before{
+      content:'';position:absolute;top:-12px;left:81px;
+      border:6px solid transparent;border-bottom-color:#8aafd6;
+    }
+    .notice-bubble::after{
+      content:'';position:absolute;top:-9px;left:81px;
+      border:5px solid transparent;border-bottom-color:white;
+    }
+    .notice-bubble.open{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+    .notice-bubble h4{
+      font-size:13px;font-weight:700;color:#2b4e8f;
+      margin-bottom:8px;border-bottom:1px solid #d0e2f2;padding-bottom:6px;
+    }
+    .notice-bubble ul{list-style:none;display:flex;flex-direction:column;gap:5px;}
+    .notice-bubble ul li{
+      font-size:11px;
+      color:#3a5a8a;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      line-height:1.2;
+      white-space:nowrap;
+    }
+    .notice-bubble ul li::before{content:'✔';color:#8aafd6;font-size:11px;margin-top:1px;flex-shrink:0;}
+
+    /* 카드 */
+    .card{
+      background:white;
+      border-radius:28px;
+      margin:12px 14px 0;
+      padding:22px 16px 28px;
+      flex:1;
+      box-shadow:0 2px 16px rgba(100,140,200,0.10);
+      border:1.5px solid #d0e2f2;
+      overflow-y:auto;
+    }
+
+    /* 빈 상태 */
+    .empty-state{
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      height:320px;gap:16px;
+    }
+    .empty-arrow-box{
+      background:#dce8f5;border-radius:16px;
+      padding:20px 32px;font-size:18px;font-weight:700;
+      color:#2b4e8f;letter-spacing:2px;
+      display:flex;align-items:center;gap:10px;
+    }
+    .empty-arrow-box .pin-icon{width:22px;height:22px;fill:#8aafd6;}
+    .empty-state p{font-size:13px;color:#9ab8d4;text-align:center;}
+
+    /* 방 목록 */
+    .room-list{display:flex;flex-direction:column;gap:14px;}
+    .room-item{
+      background:#dce8f5;
+      border-radius:14px;
+      padding:14px 16px 12px;
+      cursor:pointer;
+      border-bottom:2.5px solid #8aafd6;
+      transition:background 0.15s,transform 0.12s;
+    }
+    .room-item:hover{background:#cdddf0;transform:translateY(-1px);}
+    .room-item:active{transform:scale(0.98);}
+    .room-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+    .room-avatar{
+      width:34px;height:34px;min-width:34px;
+      border-radius:50%;background:#8aafd6;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .room-avatar svg{width:18px;height:18px;fill:white;}
+    .room-route{font-size:16px;font-weight:700;color:#1e3a72;letter-spacing:1px;}
+    .route-arrow{color:#8aafd6;margin:0 4px;}
+    .room-bottom{
+      display:flex;align-items:center;
+      justify-content:space-between;padding-left:44px;
+    }
+    .room-name{font-size:12px;color:#4a6a9a;font-weight:500;}
+    .room-count{font-size:13px;font-weight:700;color:#2b4e8f;}
+    .room-count.full{color:#e05050;}
+    .more-dots{
+      text-align:center;font-size:20px;font-weight:700;
+      color:#8aafd6;letter-spacing:4px;padding:12px 0;
+    }
+
+    /* 모달 (프로필) */
+    .modal-overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,0.35);z-index:100;
+      justify-content:center;align-items:center;
+    }
+    .modal-overlay.open{display:flex;}
+    .modal{
+      background:white;border-radius:20px;
+      padding:28px 24px;width:300px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.18);
+      animation:popIn 0.22s ease;
+    }
+    @keyframes popIn{from{opacity:0;transform:scale(0.88);}to{opacity:1;transform:scale(1);}}
+    .modal h3{font-size:16px;font-weight:700;color:#2b4e8f;margin-bottom:16px;text-align:center;}
+    .modal label{font-size:12px;color:#4a6a9a;font-weight:600;display:block;margin-bottom:4px;}
+    .modal input{
+      width:100%;padding:11px 14px;
+      border:1.5px solid #d0e2f2;border-radius:10px;
+      font-family:'Noto Sans KR',sans-serif;
+      font-size:14px;color:#2b4e8f;outline:none;margin-bottom:12px;
+    }
+    .modal input:focus{border-color:#8aafd6;}
+    .modal-btns{display:flex;gap:10px;margin-top:4px;}
+    .modal-btns button{
+      flex:1;padding:12px;border-radius:10px;border:none;
+      font-family:'Noto Sans KR',sans-serif;
+      font-size:14px;font-weight:700;cursor:pointer;
+    }
+    .btn-cancel{background:#eef4fb;color:#6b9fd4;}
+    .btn-confirm{background:#2b4e8f;color:white;}
+
+    /* 토스트 */
+    .toast{
+      position:fixed;bottom:30px;left:50%;
+      transform:translateX(-50%) translateY(20px);
+      background:#2b4e8f;color:white;
+      padding:10px 22px;border-radius:30px;
+      font-size:13px;font-weight:500;
+      opacity:0;transition:opacity 0.3s,transform 0.3s;
+      z-index:200;white-space:nowrap;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="navbar">
+    <div class="nav-left">
+      <button class="icon-btn" title="프로필" onclick="openProfileModal()">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      </button>
+      <button class="icon-btn" id="noticeBtn" title="공지">
+        <svg viewBox="0 0 24 24"><path d="M18 11v-1a6 6 0 0 0-12 0v1l-2 2v1h16v-1l-2-2zM12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2z"/></svg>
+      </button>
+    </div>
+    <button class="make-btn" onclick="goCreatePage()">방 만들기</button>
+    <div class="notice-bubble" id="noticeBubble">
+      <h4>🚕 택시팟 이용 안내</h4>
+      <ul>
+        <li>택터는 계좌번호를 정확하게 입력해 주세요</li>
+        <li>닉네임으로 참가하면 서로 확인이 쉬워요</li>
+        <li>송금 시, 닉네임으로 하면 개인정보 보호가 가능해요</li>
+        <li>정산은 '하차 후' 택터에게 송금해 주세요</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" id="mainCard"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 프로필 모달 -->
+<div class="modal-overlay" id="profileOverlay">
+  <div class="modal">
+    <h3>👤 프로필 설정</h3>
+    <label>아이디 변경</label>
+    <input id="profileName" type="text" maxlength="15" placeholder="새 아이디 입력"/>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeProfileModal()">취소</button>
+      <button class="btn-confirm" onclick="saveProfile()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getRooms() {
+    return JSON.parse(localStorage.getItem('rooms') || '[]');
+  }
+
+  const pIcon='<svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>';
+
+  function render(){
+    const rooms = getRooms();
+    const card = document.getElementById('mainCard');
+
+    if(rooms.length === 0){
+      card.innerHTML = `<div class="empty-state">
+        <div class="empty-arrow-box">
+          <svg class="pin-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          출발지 &nbsp;→&nbsp; 도착지
+        </div>
+        <p>아직 열린 방이 없어요<br>먼저 방을 만들어 보세요!</p>
+      </div>`;
+      return;
+    }
+
+    const MAX = 6;
+    const reversedRooms = [...rooms].reverse();
+    let html = '<div class="room-list">';
+    reversedRooms.slice(0, MAX).forEach((r) => {
+      const full = r.cur >= r.max;
+      html += `<div class="room-item" onclick="enterRoom('${r.id}')">
+        <div class="room-top">
+          <div class="room-avatar">${pIcon}</div>
+          <div class="room-route">${r.from} <span class="route-arrow">→</span> ${r.to}</div>
+        </div>
+        <div class="room-bottom">
+          <span class="room-name">방이름: ${r.name}</span>
+          <span class="room-count${full?' full':''}">${r.cur} / ${r.max}</span>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    if(reversedRooms.length > MAX) html += '<div class="more-dots">⋮</div>';
+    card.innerHTML = html;
+  }
+
+  function enterRoom(roomId){
+    const rooms = getRooms();
+    const room = rooms.find(r => String(r.id) === String(roomId));
+    if(!room){ showToast('방 정보를 찾을 수 없습니다.'); return; }
+    localStorage.setItem('currentRoomId', room.id);
+    window.location.href = 'waitingRoomPage.html';
+  }
+
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2400);
+  }
+
+  function goCreatePage(){
+    window.location.href = "roomMakePage.html";
+  }
+
+  // 공지 말풍선
+  const nb=document.getElementById('noticeBtn');
+  const bubble=document.getElementById('noticeBubble');
+  nb.addEventListener('click',e=>{e.stopPropagation();bubble.classList.toggle('open');});
+  document.addEventListener('click',()=>bubble.classList.remove('open'));
+
+  // 프로필 모달
+  let currentUser = localStorage.getItem('nickname') || '사용자';
+
+  function openProfileModal(){
+    document.getElementById('profileOverlay').classList.add('open');
+    document.getElementById('profileName').value = currentUser;
+  }
+  function closeProfileModal(){
+    document.getElementById('profileOverlay').classList.remove('open');
+  }
+  function saveProfile(){
+    const newName = document.getElementById('profileName').value.trim();
+    if(!newName){ showToast('아이디를 입력해주세요'); return; }
+    currentUser = newName;
+    localStorage.setItem('nickname', newName);
+    closeProfileModal();
+    showToast('아이디가 변경되었습니다');
+  }
+  document.getElementById('profileOverlay').addEventListener('click',function(e){
+    if(e.target===this) closeProfileModal();
+  });
+
+  render();
+</script>
+</body>
+</html>
