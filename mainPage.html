@@ -214,8 +214,8 @@
 <div class="modal-overlay" id="profileOverlay">
   <div class="modal">
     <h3>👤 프로필 설정</h3>
-    <label>아이디 변경</label>
-    <input id="profileName" type="text" maxlength="15" placeholder="새 아이디 입력"/>
+    <label>닉네임 변경</label>
+    <input id="profileName" type="text" maxlength="15" placeholder="새 닉네임 입력"/>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeProfileModal()">취소</button>
       <button class="btn-confirm" onclick="saveProfile()">저장</button>
@@ -302,11 +302,11 @@
   }
   function saveProfile(){
     const newName = document.getElementById('profileName').value.trim();
-    if(!newName){ showToast('아이디를 입력해주세요'); return; }
+    if(!newName){ showToast('닉네임을 입력해주세요'); return; }
     currentUser = newName;
     localStorage.setItem('nickname', newName);
     closeProfileModal();
-    showToast('아이디가 변경되었습니다');
+    showToast('닉네임이 변경되었습니다');
   }
   document.getElementById('profileOverlay').addEventListener('click',function(e){
     if(e.target===this) closeProfileModal();
