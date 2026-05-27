@@ -1,875 +1,242 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>채팅방</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>경택</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            background: rgb(202, 227, 246);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
+    :root {
+      --yellow: #F5C200;
+      --yellow-dark: #e0b000;
+      --sky: #c8dff0;
+      --sky-light: #dceef9;
+      --text-dark: #1a1a1a;
+      --text-mid: #444;
+      --white: #ffffff;
+    }
 
-        .phone-container {
-            width: 100%;
-            max-width: 400px;
-            height: 90vh;
-            max-height: 800px;
-            background: #d6e9f5;
-            border-radius: 30px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-        }
+    html, body {
+      height: 100%;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--sky-light);
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+    }
 
-        .header {
-            background: linear-gradient(135deg, #a8d4f0 0%, #c5e3f6 100%);
-            border-radius: 15px;
-            padding: 16px;
-            margin-bottom: 10px;
-            position: sticky;
-            top: 0;
-            z-index: 30;
-        }
+    .phone-wrap {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, #daeef9 0%, #c5e0f0 40%, #b8d9ee 100%);
+    }
 
-        .header-top {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 8px;
-        }
+    /* ── TOP UI AREA ── */
+    .top-section {
+      position: relative;
+      z-index: 10;
+      padding: 52px 28px 24px;
+      animation: fadeDown 0.6s ease both;
+    }
 
-        .back-btn {
-            background: #5a8fb8;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding:12px 18px;
-            font-size: 15px;
-            cursor: pointer;
-            line-height: 1.3;
-            text-align: center;
-            font-weight: 700;
-        }
+    .app-title {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--text-dark);
+      letter-spacing: -1px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
 
-        .delete-btn {
-            background: #e05050;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            line-height: 1.3;
-            text-align: center;
-        }
-        .leave-btn {
-            background: #8a8a8a;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 18px;
-            font-size: 15px;
-            cursor: pointer;
-            line-height: 1.3;
-            text-align: center;
-            font-weight: 700;
-        }
+    .subtitle {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-mid);
+      text-align: center;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
 
-        .room-info {
-            flex: 1;
-            text-align: center;
-        }
+    /* ── INPUT AREA ── */
+    .login-box {
+      position: relative;
+      z-index: 10;
+      padding: 0 28px;
+      margin-top: 10px;
+      animation: fadeDown 0.7s 0.1s ease both;
+    }
 
-        .room-name {
-            font-weight: 600;
-            color: #3a6d8c;
-            font-size: 20px;
-        }
+    .input-row {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.88);
+      border-radius: 50px;
+      padding: 6px 18px 6px 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 14px;
+      border: 1.5px solid rgba(255,255,255,0.9);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
 
-        .room-route {
-            color: #5a8fb8;
-            font-size: 17px;
-            margin-top: 2px;
-        }
+    .input-row:focus-within {
+      border-color: var(--yellow);
+      box-shadow: 0 4px 24px rgba(245,194,0,0.25);
+    }
 
-        /* 출발지/도착지 클릭 가능 스타일 */
-        .route-from, .route-to {
-            cursor: pointer;
-            border-bottom: 1.5px dashed #5a8fb8;
-            padding-bottom: 1px;
-            transition: color 0.15s, border-color 0.15s;
-            display: inline;
-        }
-        .route-from:hover { color: #e05050; border-color: #e05050; }
-        .route-to:hover   { color: #2a7a3a; border-color: #2a7a3a; }
+    .input-icon {
+      width: 38px;
+      height: 38px;
+      background: #e0e0e0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-right: 10px;
+    }
 
-        .account-info {
-            background: white;
-            border-radius: 10px;
-            padding: 10px 15px;
-            text-align: center;
-            color: #5a8fb8;
-            font-size: 14px;
-        }
+    .input-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #888;
+    }
 
-        .chat-area {
-            flex: 1;
-            background: #f0f7fc;
-            border-radius: 15px;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            min-height: 0;
-            justify-content: flex-start;
-        }
+    .input-row input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 15px;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--text-dark);
+      outline: none;
+      padding: 10px 0;
+    }
 
-        .message-group { display: flex; flex-direction: column; gap: 8px; }
+    .input-row input::placeholder {
+      color: #aaa;
+      font-weight: 400;
+    }
 
-        .message-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
+    .btn-start {
+      width: 100%;
+      padding: 16px;
+      background: var(--yellow);
+      border: none;
+      border-radius: 50px;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--text-dark);
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(245,194,0,0.4);
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
 
-        .message-row.sent { justify-content: flex-end; }
+    .btn-start:active {
+      transform: scale(0.97);
+      box-shadow: 0 3px 10px rgba(245,194,0,0.3);
+      background: var(--yellow-dark);
+    }
 
-        .avatar {
-            width: 40px; height: 40px;
-            background: #7ba7c7;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .avatar svg { width: 24px; height: 24px; fill: white; }
+    /* ── BACKGROUND ILLUSTRATION ── */
+    .bg-illustration {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      /* show the background image */
+      background-image: url("images/메인경택.png"); 
+      background-size: cover;
+      background-position: center bottom;
+      height: 65%;
+      z-index: 1;
+    }
 
-        .message-content { max-width: 70%; }
+    /* Fade overlay so top blends nicely */
+    .bg-illustration::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(to bottom, #c8dff0 0%, transparent 100%);
+      z-index: 2;
+    }
 
-        .gogi {
-            font-size: 22px;
-            color: #a9c5da;
-            margin: auto;
-            text-align: center;
-        }
+    /* spacer to push illustration down */
+    .spacer {
+      flex: 1;
+      min-height: 40px;
+    }
 
-        .bubble {
-            background: white;
-            border-radius: 15px;
-            padding: 10px 15px;
-            font-size: 14px;
-            color: #333;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .message-row.sent .bubble { background: #c5e3f6; }
-
-        .input-area { margin-top: 10px; }
-
-        .input-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            border-radius: 25px;
-            padding: 8px 15px;
-            margin-bottom: 10px;
-        }
-
-        .input-display {
-            flex: 1;
-            font-size: 14px;
-            color: #333;
-            min-height: 20px;
-            word-break: break-all;
-        }
-
-        .send-btn {
-            width: 30px; height: 30px;
-            background: #7ba7c7;
-            border: none; border-radius: 50%;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .send-btn svg { width: 16px; height: 16px; fill: white; }
-
-        .keyboard {
-            background: #f0f7fc;
-            border-radius: 15px;
-            padding: 10px;
-        }
-
-        .keyboard-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-        .keyboard-row:last-child { margin-bottom: 0; }
-
-        .key {
-            flex: 1;
-            height: 45px;
-            background: white;
-            border: 2px solid #c5e3f6;
-            border-radius: 10px;
-            font-size: 16px;
-            color: #5a8fb8;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s;
-        }
-        .key:active { background: #c5e3f6; transform: scale(0.95); }
-        .key.mascot {
-            margin-left: 10px;
-            background: transparent;
-            background-image: url(images/mascotHead.png);
-            border: none;
-            background-size: contain;
-            background-repeat: no-repeat;
-            font-size: 14px;
-            height: 50px;
-            width: 60px;
-        }
-        .key.mascot:active { transform: scale(1.1); background: transparent; }
-        .key.action { background: #daeef8; color: #5a8fb8; border-color: #c5e3f6; }
-        .key.toggle { background: #b8d8ee; color: #5a8fb8; border-color: #9ec4e0; }
-        .key.action svg, .key.toggle svg { width: 20px; height: 20px; fill: #5a8fb8; }
-
-        /* 팝업 공통 */
-        .popup-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 100;
-            animation: fadeIn 0.15s ease;
-        }
-        .popup-overlay.hidden { display: none; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes popUp  { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .popup-box {
-            background: #1e3a6e;
-            border-radius: 20px;
-            width: 280px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            animation: popUp 0.2s ease;
-            position: relative;
-        }
-
-        .popup-close {
-            position: absolute; top: 10px; left: 10px;
-            width: 32px; height: 32px;
-            background: #e05c5c; border: none; border-radius: 8px;
-            color: white; font-size: 16px; font-weight: bold;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .popup-avatar-area { display: flex; justify-content: center; padding: 40px 20px 20px; }
-        .popup-avatar-circle {
-            width: 110px; height: 110px;
-            background: #2d5096; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .popup-avatar-circle svg { width: 70px; height: 70px; fill: #7ba7c7; }
-
-        .popup-message {
-            background: #2d5096; margin: 0 15px 15px;
-            border-radius: 12px; padding: 14px 16px;
-            text-align: center; color: white; font-size: 15px;
-            line-height: 1.6; font-weight: 500;
-        }
-
-        .popup-buttons { display: flex; gap: 10px; padding: 0 15px 18px; }
-
-        .popup-btn {
-            flex: 1; height: 46px; border: none; border-radius: 12px;
-            font-size: 15px; font-weight: 600; cursor: pointer;
-            transition: transform 0.1s, opacity 0.1s;
-        }
-        .popup-btn:active { transform: scale(0.96); opacity: 0.85; }
-        .popup-btn.back { background: #e05c5c; color: white; }
-        .popup-btn.kick { background: #e05c5c; color: white; }
-
-        .choice-box {
-            background: #1e3a6e; border-radius: 20px; width: 280px;
-            overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            animation: popUp 0.2s ease; padding: 24px 18px 20px;
-            text-align: center;
-        }
-        .choice-title { color: white; font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-        .choice-subtitle { color: #8ab0d4; font-size: 13px; margin-bottom: 20px; }
-        .choice-buttons { display: flex; gap: 10px; }
-        .choice-btn {
-            flex: 1; height: 46px; border: none; border-radius: 12px;
-            font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.1s;
-        }
-        .choice-btn:active { transform: scale(0.96); }
-        .choice-btn.chat  { background: #5a8fb8; color: white; }
-        .choice-btn.lobby { background: #e05c5c; color: white; }
-
-        .chat-area::-webkit-scrollbar { width: 5px; }
-        .chat-area::-webkit-scrollbar-track { background: transparent; }
-        .chat-area::-webkit-scrollbar-thumb { background: #c5e3f6; border-radius: 5px; }
-
-        @media (max-width: 420px) {
-            body { padding: 0; }
-            .phone-container { border-radius: 0; height: 100vh; max-height: none; }
-            .key { height: 42px; font-size: 14px; }
-            .key.sm  { flex: 0.6; font-size: 14px; }
-            .key.md  { flex: 1; }
-            .key.lg  { flex: 1.5; font-size: 14px; }
-            .key.xl  { flex: 1.8; font-size: 13px; }
-        }
-
-        .info-btn {
-            position: absolute; top: 10px; right: 10px;
-            width: 28px; height: 28px; border-radius: 50%;
-            background: #7ba7c7; color: white; border: none;
-            font-size: 14px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 10; box-shadow: 0 2px 6px rgba(90,143,184,0.3);
-        }
-        .info-overlay {
-            display: none; position: absolute; inset: 0;
-            background: rgba(0,0,0,0.35); z-index: 100;
-            border-radius: 15px; justify-content: center; align-items: center;
-        }
-        .info-overlay.open { display: flex; }
-        .info-box {
-            background: #f0f7fc; border-radius: 16px;
-            width: 90%; max-height: 85%; overflow: hidden;
-            display: flex; flex-direction: column;
-        }
-        .info-hint { font-size: 11px; color: #7ba7c7; font-weight: 600; }
-        .info-box-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 14px 14px 10px; background: #f0f7fc;
-            border-radius: 16px 16px 0 0; border-bottom: 1.5px solid #d0e8f5;
-            position: sticky; top: 0; z-index: 1; flex-shrink: 0;
-        }
-        .info-box-scroll { overflow-y: auto; padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 10px; }
-        .info-box-title { font-size: 13px; font-weight: 700; color: #3a6d8c; }
-        .info-close {
-            background: #7ba7c7; border: none; border-radius: 50%;
-            width: 28px; height: 28px; font-size: 14px; font-weight: 700;
-            color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .ex-row { display: flex; flex-direction: column; gap: 4px; }
-        .ex-row.right { align-items: flex-end; }
-        .ex-row.left  { align-items: flex-start; }
-        .ex-name { font-size: 10px; color: #7ba7c7; font-weight: 600; padding: 0 4px; }
-        .ex-bubble { font-size: 12px; padding: 7px 11px; border-radius: 12px; max-width: 80%; line-height: 1.5; }
-        .ex-row.right .ex-bubble { background: #c5e3f6; color: #2b4e8f; }
-        .ex-row.left  .ex-bubble { background: white; color: #333; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-
-        /* ===================== 지도 팝업 ===================== */
-        .map-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 200;
-            animation: fadeIn 0.2s ease;
-        }
-        .map-overlay.hidden { display: none; }
-
-        .map-modal {
-            background: #fff;
-            border-radius: 22px;
-            width: 320px;
-            overflow: hidden;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
-            animation: popUp 0.25s cubic-bezier(.34,1.56,.64,1);
-            position: relative;
-        }
-
-        .map-header {
-            background: linear-gradient(135deg, #3a6d8c, #5a8fb8);
-            padding: 14px 16px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .map-header-title { color: white; font-size: 15px; font-weight: 700; }
-        .map-header-close {
-            width: 28px; height: 28px;
-            background: rgba(255,255,255,0.2);
-            border: none; border-radius: 50%;
-            color: white; font-size: 16px; font-weight: 700;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        /* 카카오맵 영역 */
-        .map-kakao-wrap {
-            width: 100%; height: 220px;
-            background: #c5d8f0;
-        }
-
-        /* 지도 하단 정보 */
-        .map-info {
-            padding: 14px 18px;
-            background: white;
-            border-top: 1.5px solid #e8f0f5;
-        }
-        .map-info-row { display: flex; align-items: center; gap: 10px; }
-        .map-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .map-dot.from { background: #e05050; }
-        .map-dot.to   { background: #2a9a4a; }
-        .map-info-text { font-size: 14px; color: #3a6d8c; font-weight: 600; }
-        .map-info-sub  { font-size: 11px; color: #8ab0d4; margin-top: 2px; }
-        .map-divider { border: none; border-top: 1px solid #e8f0f5; margin: 10px 0; }
-    </style>
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <div class="phone-container">
-        <!-- 헤더 -->
-        <div class="header">
-            <div class="header-top" style="flex-wrap:nowrap; align-items:center;">
-                <button class="back-btn" onclick="window.location.href='waitingRoomPage.html'">대기실</button>
-                <div class="room-info" style="text-align:center; flex:1; min-width:0;">
-                    <div class="room-name">
-                        <span id="chatRoomName">급구요</span>
-                        <span id="chatRoomCount" style="color:#4a8ab0;font-size:13px;margin-left:6px;">(1/6)</span>
-                    </div>
-                    <div id="chatRoomRoute"
-                         style="font-size:clamp(11px,2.5vw,17px); font-weight:600; color:#3a6d8c; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                        <span class="route-from" id="routeFrom" onclick="openMapPin('from')">출발지</span>
-                        <span style="color:#7ba7c7; margin:0 4px;">→</span>
-                        <span class="route-to" id="routeTo" onclick="openMapPin('to')">도착지</span>
-                    </div>
-                </div>
-                <div id="roomActionBtn" style="display:flex; gap:6px; flex-shrink:0;">
-                    <div style="display:flex; flex-direction:column; gap:6px;">
-                        <button class="delete-btn" onclick="deleteRoom()">방 삭제</button>
-                        <button class="delete-btn" onclick="openKickPopup()">강제 퇴출</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="phone-wrap">
 
-        <!-- 채팅 영역 -->
-        <div class="chat-area" id="chatArea">
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 8px; position:sticky; top:0; z-index:20; background:#f0f7fc; flex-shrink:0;">
-                <span style="flex:1; text-align:center; font-size:13px; color:#7ba7c7; font-weight:700;" id="accountHint"></span>
-                <button class="info-btn" style="position:static; flex-shrink:0;" onclick="openInfo()">?</button>
-            </div>
-            <div class="gogi">자유롭게 대화를 시작하여 보세요!!</div>
-
-            <div class="info-overlay" id="infoOverlay">
-                <div class="info-box">
-                    <div class="info-box-header">
-                        <span class="info-box-title">💬 예시 대화</span>
-                        <span class="info-hint">기룡이를 누르면 띄어쓰기가 돼요!</span>
-                        <button class="info-close" onclick="closeInfo()">✕</button>
-                    </div>
-                    <div class="info-box-scroll">
-                        <div class="ex-row right"><span class="ex-name">택터</span><div class="ex-bubble">택시 도착 3분 전</div></div>
-                        <div class="ex-row right"><div class="ex-bubble">도착 몇 분 전?</div></div>
-                        <div class="ex-row left"><span class="ex-name">택티2</span><div class="ex-bubble">곧 도착 1분 전</div></div>
-                        <div class="ex-row left"><span class="ex-name">택티1</span><div class="ex-bubble">번호판 몇 ?</div></div>
-                        <div class="ex-row right"><span class="ex-name">택터</span><div class="ex-bubble">1234</div></div>
-                        <div class="ex-row left"><span class="ex-name">택티2</span><div class="ex-bubble">도착 완료</div></div>
-                        <div class="ex-row right"><span class="ex-name">택터</span><div class="ex-bubble">총금액 5600원</div></div>
-                        <div class="ex-row right"><div class="ex-bubble">1400원 송금 요망</div></div>
-                        <div class="ex-row left"><span class="ex-name">택티1</span><div class="ex-bubble">송금 완료</div></div>
-                        <div class="ex-row left"><span class="ex-name">택티3</span><div class="ex-bubble">송금 완료</div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 입력 영역 -->
-        <div class="input-area">
-            <div class="input-row">
-                <div class="input-display" id="inputDisplay"></div>
-                <button class="send-btn" onclick="sendMessage()">
-                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                </button>
-            </div>
-
-            <div class="keyboard" id="textKeyboard">
-                <div class="keyboard-row">
-                    <button class="key xl" onclick="addText('총금액')">총금액</button>
-                    <button class="key sm" onclick="addText('원')">원</button>
-                    <button class="key lg" onclick="addText('송금')">송금</button>
-                    <button class="key action" onclick="deleteText()">←</button>
-                </div>
-                <div class="keyboard-row">
-                    <button class="key sm" onclick="addText('곧')">곧</button>
-                    <button class="key md" onclick="addText('도착')">도착</button>
-                    <button class="key lg" onclick="addText('완료')">완료</button>
-                    <button class="key lg" onclick="addText('확인')">확인</button>
-                </div>
-                <div class="keyboard-row">
-                    <button class="key md" onclick="addText('택시')">택시</button>
-                    <button class="key xl" onclick="addText('번호판')">번호판</button>
-                    <button class="key md" onclick="addText('요망')">요망</button>
-                </div>
-                <div class="keyboard-row">
-                    <button class="key sm" onclick="addText('몇')">몇</button>
-                    <button class="key sm" onclick="addText('분')">분</button>
-                    <button class="key sm" onclick="addText('전')">전</button>
-                    <button class="key sm" onclick="addText('?')">?</button>
-                    <button class="key mascot" onclick="addText(' ')"></button>
-                    <button class="key toggle" onclick="toggleKeyboard()">
-                        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="keyboard" id="numberKeyboard" style="display:none;">
-                <div class="keyboard-row">
-                    <button class="key md" onclick="addText('1')">1</button>
-                    <button class="key md" onclick="addText('2')">2</button>
-                    <button class="key md" onclick="addText('3')">3</button>
-                    <button class="key action" onclick="deleteText()">←</button>
-                </div>
-                <div class="keyboard-row">
-                    <button class="key md" onclick="addText('4')">4</button>
-                    <button class="key md" onclick="addText('5')">5</button>
-                    <button class="key md" onclick="addText('6')">6</button>
-                    <button class="key md" onclick="addText('0')">0</button>
-                </div>
-                <div class="keyboard-row">
-                    <button class="key md" onclick="addText('7')">7</button>
-                    <button class="key md" onclick="addText('8')">8</button>
-                    <button class="key md" onclick="addText('9')">9</button>
-                    <button class="key toggle" onclick="toggleKeyboard()">
-                        <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41z"/></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
+    <!-- TOP: title + input -->
+    <div class="top-section">
+      <h1 class="app-title">경 택</h1>
+      <p class="subtitle">계좌이체할 때 설정한 아이디로 송금<br>하면 개인정보를 지킬 수 있어요!</p>
     </div>
 
-    <!-- 강제 퇴출 팝업 -->
-    <div class="popup-overlay hidden" id="kickOverlay">
-        <div class="popup-box">
-            <button class="popup-close" onclick="closeKickPopup()">✕</button>
-            <div class="popup-avatar-area">
-                <div class="popup-avatar-circle">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-            </div>
-            <div class="popup-message" id="kickMessage">강제 탈퇴시킬 택티를 선택해주세요</div>
-            <select id="kickSelect" onchange="currentKickTarget=this.value" style="width:calc(100% - 30px); margin:0 15px 15px; padding:12px; border-radius:10px; border:none; font-size:15px; font-weight:700; color:#1e3a6e;"></select>
-            <div class="popup-buttons">
-                <button class="popup-btn back" onclick="closeKickPopup()">돌아가기</button>
-                <button class="popup-btn kick" onclick="doKick()">강제 탈퇴</button>
-            </div>
+    <div class="login-box">
+      <div class="input-row">
+        <div class="input-icon">
+          <!-- person icon -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+          </svg>
         </div>
+        <input type="text" id="username" placeholder="닉네임을 기입하여 주세요." />
+      </div>
+
+      <button class="btn-start" id="startBtn">
+         start
+      </button>
     </div>
 
-    <!-- 퇴출 후 선택 팝업 -->
-    <div class="popup-overlay hidden" id="choiceOverlay">
-        <div class="choice-box">
-            <div class="choice-title">퇴출 완료!</div>
-            <div class="choice-subtitle" id="kickedName"></div>
-            <div class="choice-buttons">
-                <button class="choice-btn chat"  onclick="goToChat()">채팅방 유지</button>
-                <button class="choice-btn lobby" onclick="goToLobby()">대기실 이동</button>
-            </div>
-        </div>
-    </div>
+    <div class="spacer"></div>
 
-    <div class="popup-overlay hidden" id="deleteOverlay">
-        <div class="choice-box">
-            <div class="choice-title">방을 삭제하시겠습니까?</div>
-            <div class="choice-subtitle">삭제하면 모든 인원이 퇴장됩니다.</div>
-            <div class="choice-buttons">
-                <button class="choice-btn chat"  onclick="closeDeletePopup()">취소</button>
-                <button class="choice-btn lobby" onclick="confirmDeleteRoom()">삭제</button>
-            </div>
-        </div>
-    </div>
+    <!-- Background illustration -->
+    <div class="bg-illustration"></div>
 
-    <!-- ============ 지도 팝업 ============ -->
-    <div class="map-overlay hidden" id="mapOverlay" onclick="handleMapOverlayClick(event)">
-        <div class="map-modal" id="mapModal">
-            <div class="map-header">
-                <span class="map-header-title" id="mapTitle">📍 출발지 위치</span>
-                <button class="map-header-close" onclick="closeMapPin()">✕</button>
-            </div>
+  </div>
+  <script>
+    const startBtn = document.getElementById('startBtn');
 
-            <!-- 카카오맵 -->
-            <div class="map-kakao-wrap">
-                <div id="popupMap" style="width:100%; height:100%;"></div>
-            </div>
-
-            <!-- 하단 정보 -->
-            <div class="map-info">
-                <div class="map-info-row">
-                    <div class="map-dot from"></div>
-                    <div>
-                        <div class="map-info-text" id="mapFromText">출발지</div>
-                        <div class="map-info-sub">출발지</div>
-                    </div>
-                </div>
-                <hr class="map-divider">
-                <div class="map-info-row">
-                    <div class="map-dot to"></div>
-                    <div>
-                        <div class="map-info-text" id="mapToText">도착지</div>
-                        <div class="map-info-sub">도착지</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        /* ---- 카카오맵 팝업 ---- */
-        let popupMap = null;
-        let popupMarker = null;
-        let kakaoReady = false;
-
-        // 카카오맵 SDK 로드 후 호출됨
-        function onKakaoReady() {
-            kakaoReady = true;
-        }
-
-        function openMapPin(type) {
-            const room = window.currentRoom || {};
-            const fromName = room.from || document.getElementById('routeFrom').textContent || '출발지';
-            const toName   = room.to   || document.getElementById('routeTo').textContent   || '도착지';
-
-            const keyword = type === 'from' ? fromName : toName;
-            const title   = type === 'from' ? '📍 출발지 위치' : '📍 도착지 위치';
-
-            // 저장된 좌표 꺼내기 (출발지만 좌표 저장됨, 도착지는 키워드 검색)
-            const lat = type === 'from' ? (room.fromLat || null) : (room.toLat || null);
-            const lng = type === 'from' ? (room.fromLng || null) : (room.toLng || null);
-
-            document.getElementById('mapTitle').textContent   = title;
-            document.getElementById('mapFromText').textContent = fromName;
-            document.getElementById('mapToText').textContent   = toName;
-
-            document.getElementById('mapOverlay').classList.remove('hidden');
-
-            // 지도 초기화 (팝업이 보인 뒤에 해야 크기가 맞음)
-            setTimeout(() => { initPopupMap(keyword, lat, lng); }, 80);
-        }
-
-        function initPopupMap(keyword, lat, lng) {
-            if (!window.kakao || !window.kakao.maps) {
-                document.getElementById('popupMap').innerHTML =
-                    '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#7ba7c7;font-size:13px;font-weight:700;">지도를 불러오는 중...</div>';
-                return;
-            }
-
-            const container = document.getElementById('popupMap');
-
-            // 기본 중심 (수원역)
-            const defaultCenter = new kakao.maps.LatLng(37.2662, 127.0027);
-
-            if (!popupMap) {
-                popupMap = new kakao.maps.Map(container, {
-                    center: defaultCenter,
-                    level: 4
-                });
-                popupMarker = new kakao.maps.Marker({ position: defaultCenter });
-                popupMarker.setMap(popupMap);
-            }
-
-            // 좌표가 있으면 바로 이동 (정확한 위치)
-            if (lat && lng) {
-                const coords = new kakao.maps.LatLng(lat, lng);
-                popupMap.setCenter(coords);
-                popupMarker.setPosition(coords);
-                kakao.maps.event.trigger(popupMap, 'resize');
-                return;
-            }
-
-            // 좌표 없으면 키워드 검색으로 폴백
-            const ps = new kakao.maps.services.Places();
-            ps.keywordSearch(keyword, function(data, status) {
-                if (status === kakao.maps.services.Status.OK && data.length > 0) {
-                    const place  = data[0];
-                    const coords = new kakao.maps.LatLng(place.y, place.x);
-                    popupMap.setCenter(coords);
-                    popupMarker.setPosition(coords);
-                    kakao.maps.event.trigger(popupMap, 'resize');
-                } else {
-                    kakao.maps.event.trigger(popupMap, 'resize');
-                }
-            });
-        }
-
-        function closeMapPin() {
-            document.getElementById('mapOverlay').classList.add('hidden');
-        }
-
-        function handleMapOverlayClick(e) {
-            if (e.target === document.getElementById('mapOverlay')) closeMapPin();
-        }
-
-        /* ---- 기존 기능 ---- */
-        const store = {
-            get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
-            set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
-            remove: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
-        };
-
-        let currentKickTarget = null;
-        let currentText = '';
-        let isTextKeyboard = true;
-
-        function addText(text) {
-            const gogi = document.querySelector('.gogi');
-            if (gogi) gogi.remove();
-            currentText += text;
-            document.getElementById('inputDisplay').textContent = currentText;
-        }
-
-        function toggleKeyboard() {
-            const textKeyboard   = document.getElementById('textKeyboard');
-            const numberKeyboard = document.getElementById('numberKeyboard');
-            if (isTextKeyboard) {
-                textKeyboard.style.display   = 'none';
-                numberKeyboard.style.display = 'block';
-            } else {
-                textKeyboard.style.display   = 'block';
-                numberKeyboard.style.display = 'none';
-            }
-            isTextKeyboard = !isTextKeyboard;
-        }
-
-        function sendMessage() {
-            if (currentText.trim() === '') return;
-            const chatArea = document.getElementById('chatArea');
-            const group    = document.createElement('div');
-            group.className = 'message-group';
-            const row = document.createElement('div');
-            row.className = 'message-row sent';
-            const content = document.createElement('div');
-            content.className = 'message-content';
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            bubble.textContent = currentText;
-            content.appendChild(bubble);
-            row.appendChild(content);
-            group.appendChild(row);
-            chatArea.appendChild(group);
-            setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 50);
-            currentText = '';
-            document.getElementById('inputDisplay').textContent = '';
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace') {
-                currentText = currentText.slice(0, -1);
-                document.getElementById('inputDisplay').textContent = currentText;
-            }
-        });
-
-        function deleteText() {
-            if (currentText.length > 0) {
-                currentText = currentText.slice(0, -1);
-                document.getElementById('inputDisplay').textContent = currentText;
-            }
-        }
-
-        function openKickPopup() {
-            document.getElementById('kickSelect').innerHTML = '<option value="택티1">택티1</option><option value="택티2">택티2</option>';
-            currentKickTarget = '택티1';
-            document.getElementById('kickOverlay').classList.remove('hidden');
-        }
-
-        function closeKickPopup() {
-            document.getElementById('kickOverlay').classList.add('hidden');
-            currentKickTarget = null;
-        }
-
-        function doKick() {
-            currentKickTarget = document.getElementById('kickSelect').value;
-            if (!currentKickTarget) { alert('퇴출할 택티가 없습니다.'); return; }
-            document.getElementById('kickedName').textContent = `${currentKickTarget}님이 퇴출되었습니다`;
-            document.getElementById('kickOverlay').classList.add('hidden');
-            document.getElementById('choiceOverlay').classList.remove('hidden');
-        }
-
-        function goToChat()  { document.getElementById('choiceOverlay').classList.add('hidden'); currentKickTarget = null; }
-        function goToLobby() { document.getElementById('choiceOverlay').classList.add('hidden'); currentKickTarget = null; window.location.href = 'waitingRoomPage.html'; }
-
-        function openInfo()  { document.getElementById('infoOverlay').classList.add('open'); }
-        function closeInfo() { document.getElementById('infoOverlay').classList.remove('open'); }
-
-        function deleteRoom() { document.getElementById('deleteOverlay').classList.remove('hidden'); }
-        function confirmDeleteRoom() { window.location.href = 'mainPage.html'; }
-        function closeDeletePopup() { document.getElementById('deleteOverlay').classList.add('hidden'); }
-    </script>
-
-    <!-- 카카오맵 SDK (방만들기와 동일한 키) -->
-    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=178144753681a4e132afe3a7e5209961&libraries=services"></script>
-
-    <!-- Firebase: 방 정보 실시간 로드 -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import {
-            getFirestore,
-            doc,
-            onSnapshot
-        } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDvFEypLTMRwfRMcnQaBQevFAKHMu-zsbc",
-            authDomain: "kyonggitaxi.firebaseapp.com",
-            projectId: "kyonggitaxi",
-            storageBucket: "kyonggitaxi.firebasestorage.app",
-            messagingSenderId: "518555765082",
-            appId: "1:518555765082:web:34eee83ec31369d00d0b63",
-            measurementId: "G-30G3VDXZVV"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db  = getFirestore(app);
-
-        const store = {
-            get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } }
-        };
-
-        const roomId = store.get('currentRoomId');
-        if (!roomId) {
-            console.warn('currentRoomId 없음 — 방 정보 로드 생략');
-        } else {
-            onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
-                if (!docSnap.exists()) return;
-
-                const room = { id: docSnap.id, ...docSnap.data() };
-
-                // 전역에 저장 (openMapPin에서 참조)
-                window.currentRoom = room;
-
-                // 헤더 UI 업데이트
-                const nameEl  = document.getElementById('chatRoomName');
-                const countEl = document.getElementById('chatRoomCount');
-                const fromEl  = document.getElementById('routeFrom');
-                const toEl    = document.getElementById('routeTo');
-                const acctEl  = document.getElementById('accountHint');
-
-                if (nameEl)  nameEl.textContent  = room.name  || '';
-                if (countEl) countEl.textContent = `(${room.cur || 1}/${room.max || 4})`;
-                if (fromEl)  fromEl.textContent  = room.from  || '출발지';
-                if (toEl)    toEl.textContent     = room.to    || '도착지';
-                if (acctEl)  acctEl.textContent  =
-                    (room.bank ? room.bank + ' ' : '') + (room.account || '');
-            });
-        }
-    </script>
+    startBtn.addEventListener('click', () => {
+      const usernameInput = document.getElementById('username');
+      const username = usernameInput.value.trim();
+      if (username === '') {
+        alert('닉네임을 기입하여 주세요.');
+        usernameInput.focus();
+        return;
+      }
+      localStorage.setItem('nickname', username);
+      startBtn.disabled = true;
+      startBtn.style.opacity = '0.5';
+      setTimeout(() => { window.location.href = 'mainPage.html'; }, 300);
+    });
+  </script>
 </body>
 </html>
