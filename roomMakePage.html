@@ -36,7 +36,7 @@
     }
 
     .mascot {
-      background-image: url("images/기룡.png");
+      background-image: url("images/mascot.png");
       position: absolute;
       top: -35px;
       right: -30px;
@@ -229,220 +229,250 @@
 </head>
 <body>
 
-<div class="card">
-  <div class="mascot"></div>
+  <div class="card">
+    <div class="mascot"></div>
 
-  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; margin-top:16px; margin-right: 40px;">
-      <div class="title-btn" style="margin:0;">방 만들기</div>
-      <button onclick="window.location.href='mainPage.html'" style="background:#7ba7c7; color:white; border:none; border-radius:50%; width:36px; height:36px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; z-index:10;">✕</button>
-  </div>
-
-  <div class="map-area">
-    <div id="map" style="width:100%; height:100%;"></div>
-  </div>
-
-  <!-- 출발지 -->
-  <div class="field-row">
-    <span class="field-label">출발지</span>
-    <input class="field-input" type="text" id="roomFrom" placeholder="예) 수원역" maxlength="15"/>
-  </div>
-
-  <!-- 도착지 -->
-  <div class="field-row">
-    <span class="field-label">도착지</span>
-    <input class="field-input" type="text" id="roomTo" placeholder="예) 경기대" maxlength="15"/>
-  </div>
-
-  <!-- 방 제목 -->
-  <div class="field-row">
-    <span class="field-label">방제목</span>
-    <input class="field-input" type="text" id="roomTitle" placeholder="방 제목을 입력하세요" maxlength="30"/>
-  </div>
-
-  <!-- 계좌번호 -->
-<div class="field-row">
-    <span class="field-label">계좌번호</span>
-    <!-- 은행 선택 드롭다운 -->
-    <select class="field-input" id="bankSelect" style="flex: 0.4; margin-right: 5px; padding: 8px; font-weight:700; font-family:'Nanum Gothic',sans-serif;">
-      <option value="" disabled selected>은행선택</option>
-      <option value="카카오뱅크">카카오뱅크</option>
-      <option value="신한은행">신한은행</option>
-      <option value="국민은행">국민은행</option>
-      <option value="토스뱅크">토스뱅크</option>
-      <option value="농협은행">농협은행</option>
-      <option value="기타">기타</option>
-    </select>
-    <!-- 계좌번호 입력 (하이픈 제외) -->
-    <input class="field-input" type="text" id="accountNum" placeholder="하이픈(-) 제외 입력" maxlength="20" style="flex: 0.6;"/>
-  </div>
-
-  <!-- 인원 슬라이더 -->
-  <div class="slider-row">
-    <div class="slider-top" style="justify-content:space-between;">
-        <span class="field-label">인 원 (본인 포함)</span>
-        <span class="slider-value-badge" id="sliderVal">3명</span>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; margin-top:16px; margin-right: 40px;">
+        <div class="title-btn" style="margin:0;">방 만들기</div>
+        <button onclick="window.location.href='mainPage.html'" style="background:#7ba7c7; color:white; border:none; border-radius:50%; width:36px; height:36px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; z-index:10;">✕</button>
     </div>
-    <div class="slider-wrap">
-      <input type="range" id="peopleSlider" min="2" max="6" value="2" step="1"/>
-      <div class="slider-ticks">
-        <div class="tick">2</div>
-        <div class="tick">3</div>
-        <div class="tick">4</div>
-        <div class="tick">5</div>
-        <div class="tick">6</div>
+
+    <div class="map-area">
+      <div id="map" style="width:100%; height:100%;"></div>
+    </div>
+
+    <!-- 출발지 -->
+    <div class="field-row">
+      <span class="field-label">출발지</span>
+      <input class="field-input" type="text" id="roomFrom" placeholder="예) 수원역" maxlength="15"/>
+    </div>
+
+    <!-- 도착지 -->
+    <div class="field-row">
+      <span class="field-label">도착지</span>
+      <input class="field-input" type="text" id="roomTo" placeholder="예) 경기대" maxlength="15"/>
+    </div>
+
+    <!-- 방 제목 -->
+    <div class="field-row">
+      <span class="field-label">방제목</span>
+      <input class="field-input" type="text" id="roomTitle" placeholder="방 제목을 입력하세요" maxlength="30"/>
+    </div>
+
+    <!-- 계좌번호 -->
+  <div class="field-row">
+      <span class="field-label">계좌번호</span>
+      <!-- 은행 선택 드롭다운 -->
+      <select class="field-input" id="bankSelect" style="flex: 0.4; margin-right: 5px; padding: 8px; font-weight:700; font-family:'Nanum Gothic',sans-serif;">
+        <option value="" disabled selected>은행선택</option>
+        <option value="카카오뱅크">카카오뱅크</option>
+        <option value="신한은행">신한은행</option>
+        <option value="국민은행">국민은행</option>
+        <option value="토스뱅크">토스뱅크</option>
+        <option value="농협은행">농협은행</option>
+        <option value="기타">기타</option>
+      </select>
+      <!-- 계좌번호 입력 (하이픈 제외) -->
+      <input class="field-input" type="text" id="accountNum" placeholder="하이픈(-) 제외 입력" maxlength="20" style="flex: 0.6;"/>
+    </div>
+
+    <!-- 인원 슬라이더 -->
+    <div class="slider-row">
+      <div class="slider-top" style="justify-content:space-between;">
+          <span class="field-label">인 원 (본인 포함)</span>
+          <span class="slider-value-badge" id="sliderVal">3명</span>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="peopleSlider" min="2" max="6" value="2" step="1"/>
+        <div class="slider-ticks">
+          <div class="tick">2</div>
+          <div class="tick">3</div>
+          <div class="tick">4</div>
+          <div class="tick">5</div>
+          <div class="tick">6</div>
+        </div>
       </div>
     </div>
+
+    <button class="submit-btn" onclick="handleSubmit()">생 성</button>
   </div>
 
-  <button class="submit-btn" onclick="handleSubmit()">생 성</button>
-</div>
+  <div class="toast" id="toast">방이 생성되었습니다!</div>
 
-<div class="toast" id="toast">방이 생성되었습니다!</div>
+  <script>
+    const store = {
+        get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+        set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+        remove: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+    };
+    /* 슬라이더 */
+    const slider = document.getElementById('peopleSlider');
+    const sliderVal = document.getElementById('sliderVal');
 
-<script>
-  /* 슬라이더 */
-  const slider = document.getElementById('peopleSlider');
-  const sliderVal = document.getElementById('sliderVal');
+    function updateSlider() {
+      const val = parseFloat(slider.value);
+      const min = parseFloat(slider.min);
+      const max = parseFloat(slider.max);
+      
+      // 최소값이 0이 아닐 때의 올바른 백분율 계산식
+      const pct = ((val - min) / (max - min)) * 100;
+      
+      slider.style.background = 
+        `linear-gradient(to right, #3a5ab8 0%, #3a5ab8 ${pct}%, #d0d8f0 ${pct}%, #d0d8f0 100%)`;
+      sliderVal.textContent = val + '명';
+    }
+    slider.addEventListener('input', updateSlider);
+    updateSlider();
 
-  function updateSlider() {
-    const val = parseFloat(slider.value);
-    const min = parseFloat(slider.min);
-    const max = parseFloat(slider.max);
-    
-    // 최소값이 0이 아닐 때의 올바른 백분율 계산식
-    const pct = ((val - min) / (max - min)) * 100;
-    
-    slider.style.background = 
-      `linear-gradient(to right, #3a5ab8 0%, #3a5ab8 ${pct}%, #d0d8f0 ${pct}%, #d0d8f0 100%)`;
-    sliderVal.textContent = val + '명';
-  }
-  slider.addEventListener('input', updateSlider);
-  updateSlider();
+    /* 생성 버튼 */
+    async function handleSubmit() {
+      const title   = document.getElementById('roomTitle').value.trim();
+      const account = document.getElementById('accountNum').value.trim();
+      const bank    = document.getElementById('bankSelect').value;
+      const people  = parseInt(slider.value);
 
-  /* 생성 버튼 */
-  function handleSubmit() {
-    const title   = document.getElementById('roomTitle').value.trim();
-    const account = document.getElementById('accountNum').value.trim();
-    const bank    = document.getElementById('bankSelect').value;
-    const people  = parseInt(slider.value);
+      if (!title)   { alert('방 제목을 입력해주세요!'); return; }
+      if (!account) { alert('계좌번호를 입력해주세요!'); return; }
 
-    if (!title)   { alert('방 제목을 입력해주세요!'); return; }
-    if (!account) { alert('계좌번호를 입력해주세요!'); return; }
+      // 새 방 객체 생성
+      const newRoom = {
+        name: title,
+        from: document.getElementById('roomFrom').value.trim() || '출발지',
+        to: document.getElementById('roomTo').value.trim() || '도착지',
+        account: account,
+        bank:bank,
+        max: people,
+        cur: 1,
+        host: store.get('nickname') || '택터',
+        members: [store.get('nickname') || '택티'],
+        createdAt: new Date().toISOString()
+      };
 
-    // localStorage에서 기존 방 목록 불러오기
-    const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+      const docRef = await addDoc(collection(db, "rooms"), newRoom);
+      try { store.set('currentRoomId', docRef.id); } catch(e) {}
+      setTimeout(() => { window.location.href = 'waitingRoomPage.html'; }, 800);
+      const toast = document.getElementById('toast');
+      toast.textContent = '"' + title + '" 방이 생성되었습니다! (' + people + '명)';
+      toast.classList.add('show');
 
-    // 새 방 객체 생성
-    const newRoom = {
-      id: Date.now(),
-      name: title,
-      from: document.getElementById('roomFrom').value.trim() || '출발지',
-      to: document.getElementById('roomTo').value.trim() || '도착지',
-      account: account,
-      bank:bank,
-      max: people,
-      cur: 1,
-      host: localStorage.getItem('nickname') || '택터',
-      members: [localStorage.getItem('nickname') || '택티'],
-      createdAt: new Date().toISOString()
+      setTimeout(() => {
+          window.location.href = "waitingRoomPage.html";
+      }, 800);
+    }
+    document.getElementById('bankSelect').addEventListener('change', function() {
+        this.classList.add('selected');
+        this.style.color = '#2a3a6e';
+    });
+  </script>
+
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=178144753681a4e132afe3a7e5209961&libraries=services"></script>
+
+  <script>
+    const mapContainer = document.getElementById('map');
+
+    const mapOption = {
+      center: new kakao.maps.LatLng(37.3000, 127.0350),
+      level: 4
     };
 
-    rooms.push(newRoom);
-    localStorage.setItem('rooms', JSON.stringify(rooms));
-    localStorage.setItem('currentRoomId', newRoom.id);
+    const map = new kakao.maps.Map(mapContainer, mapOption);
 
-    const toast = document.getElementById('toast');
-    toast.textContent = '"' + title + '" 방이 생성되었습니다! (' + people + '명)';
-    toast.classList.add('show');
-
-    setTimeout(() => {
-        window.location.href = "waitingRoomPage.html";
-    }, 800);
-  }
-  document.getElementById('bankSelect').addEventListener('change', function() {
-      this.classList.add('selected');
-      this.style.color = '#2a3a6e';
-  });
-</script>
-
-<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=178144753681a4e132afe3a7e5209961&libraries=services"></script>
-
-<script>
-  const mapContainer = document.getElementById('map');
-
-  const mapOption = {
-    center: new kakao.maps.LatLng(37.3000, 127.0350),
-    level: 4
-  };
-
-  const map = new kakao.maps.Map(mapContainer, mapOption);
-
-  let marker = new kakao.maps.Marker({
-    position: mapOption.center
-  });
-
-  marker.setMap(map);
-
-  const geocoder = new kakao.maps.services.Geocoder();
-
-  kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
-    const latlng = mouseEvent.latLng;
-
-    marker.setPosition(latlng);
-    map.setCenter(latlng);
-
-    geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
-      if (status === kakao.maps.services.Status.OK) {
-        const address = result[0].address.address_name;
-        document.getElementById('roomFrom').value = address;
-      }
+    let marker = new kakao.maps.Marker({
+      position: mapOption.center
     });
-  });
 
-  const ps = new kakao.maps.services.Places();
+    marker.setMap(map);
 
-  document.getElementById('roomFrom').addEventListener('keydown', function(e){
-    if(e.key !== 'Enter') return;
+    const geocoder = new kakao.maps.services.Geocoder();
 
-    const keyword = this.value.trim();
+    kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+      const latlng = mouseEvent.latLng;
 
-    if(!keyword) return;
+      marker.setPosition(latlng);
+      map.setCenter(latlng);
 
-    ps.keywordSearch(keyword, function(data, status){
-      if(status === kakao.maps.services.Status.OK){
-        const place = data[0];
-        const coords = new kakao.maps.LatLng(place.y, place.x);
-
-        map.setCenter(coords);
-        marker.setPosition(coords);
-      }
-      else{
-        alert('출발지를 찾을 수 없습니다.');
-      }
-    });
-  });
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-
-      const currentPos = new kakao.maps.LatLng(lat, lng);
-
-      map.setCenter(currentPos);
-      marker.setPosition(currentPos);
-
-      geocoder.coord2Address(lng, lat, function(result, status) {
+      geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
         if (status === kakao.maps.services.Status.OK) {
           const address = result[0].address.address_name;
           document.getElementById('roomFrom').value = address;
         }
       });
-
-    }, function() {
-      console.log('현재 위치를 가져올 수 없습니다.');
     });
-  }
-</script>
+
+    const ps = new kakao.maps.services.Places();
+
+    document.getElementById('roomFrom').addEventListener('keydown', function(e){
+      if(e.key !== 'Enter') return;
+
+      const keyword = this.value.trim();
+
+      if(!keyword) return;
+
+      ps.keywordSearch(keyword, function(data, status){
+        if(status === kakao.maps.services.Status.OK){
+          const place = data[0];
+          const coords = new kakao.maps.LatLng(place.y, place.x);
+
+          map.setCenter(coords);
+          marker.setPosition(coords);
+        }
+        else{
+          alert('출발지를 찾을 수 없습니다.');
+        }
+      });
+    });
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        const currentPos = new kakao.maps.LatLng(lat, lng);
+
+        map.setCenter(currentPos);
+        marker.setPosition(currentPos);
+
+        geocoder.coord2Address(lng, lat, function(result, status) {
+          if (status === kakao.maps.services.Status.OK) {
+            const address = result[0].address.address_name;
+            document.getElementById('roomFrom').value = address;
+          }
+        });
+
+      }, function() {
+        console.log('현재 위치를 가져올 수 없습니다.');
+      });
+    }
+  </script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDvFEypLTMRwfRMcnQaBQevFAKHMu-zsbc",
+      authDomain: "kyonggitaxi.firebaseapp.com",
+      projectId: "kyonggitaxi",
+      storageBucket: "kyonggitaxi.firebasestorage.app",
+      messagingSenderId: "518555765082",
+      appId: "1:518555765082:web:34eee83ec31369d00d0b63",
+      measurementId: "G-30G3VDXZVV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.collection = collection;
+    window.addDoc = addDoc;
+    window.getDocs = getDocs;
+    window.onSnapshot = onSnapshot;
+  </script>
 </body>
 </html>
