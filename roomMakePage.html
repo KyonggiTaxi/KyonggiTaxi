@@ -75,32 +75,6 @@
       position: relative;
     }
 
-    /* 카카오 roughmap이 생성하는 컨테이너 강제 크기 맞추기 */
-    .map-area .root_daum_roughmap {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    /* roughmap 내부 iframe 크기 강제 */
-    .map-area iframe {
-      width: 100% !important;
-      height: 100% !important;
-      border: none !important;
-      display: block;
-    }
-
-    /* roughmap 내부 불필요한 UI 숨기기 (하단 카카오 바) */
-    .map-area .wrap_controllers {
-      display: none !important;
-    }
-
-    /* 지도 위에 뜨는 링크 레이어 제거 */
-    .map-area .link_map {
-      display: none !important;
-    }
-
-    /* ===================== */
-
     .field-row {
       display: flex;
       align-items: center;
@@ -263,11 +237,8 @@
       <button onclick="window.location.href='mainPage.html'" style="background:#7ba7c7; color:white; border:none; border-radius:50%; width:36px; height:36px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; z-index:10;">✕</button>
   </div>
 
-  <!-- =====================
-       카카오 지도퍼가기 삽입
-  ===================== -->
   <div class="map-area">
-    <div id="daumRoughmapContainer1778030991341" class="root_daum_roughmap root_daum_roughmap_landing"></div>
+    <div id="map" style="width:100%; height:100%;"></div>
   </div>
 
   <!-- 출발지 -->
@@ -328,20 +299,6 @@
 
 <div class="toast" id="toast">방이 생성되었습니다!</div>
 
-<!-- =====================
-     카카오 지도퍼가기 스크립트
-     (body 닫기 직전에 위치시켜야 안전)
-===================== -->
-<script charset="UTF-8" class="daum_roughmap_loader_script" src="https://ssl.daumcdn.net/dmaps/map_js_init/roughmapLoader.js"></script>
-<script charset="UTF-8">
-  new daum.roughmap.Lander({
-    "timestamp" : "1778030991341",
-    "key"       : "mwckv4pr26i",
-    "mapWidth"  : "640",
-    "mapHeight" : "360"
-  }).render();
-</script>
-
 <script>
   /* 슬라이더 */
   const slider = document.getElementById('peopleSlider');
@@ -361,11 +318,6 @@
   }
   slider.addEventListener('input', updateSlider);
   updateSlider();
-
-  /* 계좌번호 자동 하이픈 */
-document.getElementById('accountNum').addEventListener('input', function() {
-  this.value = this.value.replace(/[^0-9]/g, ''); 
-});
 
   /* 생성 버튼 */
   function handleSubmit() {
@@ -411,6 +363,86 @@ document.getElementById('accountNum').addEventListener('input', function() {
       this.classList.add('selected');
       this.style.color = '#2a3a6e';
   });
+</script>
+
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=178144753681a4e132afe3a7e5209961&libraries=services"></script>
+
+<script>
+  const mapContainer = document.getElementById('map');
+
+  const mapOption = {
+    center: new kakao.maps.LatLng(37.3000, 127.0350),
+    level: 4
+  };
+
+  const map = new kakao.maps.Map(mapContainer, mapOption);
+
+  let marker = new kakao.maps.Marker({
+    position: mapOption.center
+  });
+
+  marker.setMap(map);
+
+  const geocoder = new kakao.maps.services.Geocoder();
+
+  kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+    const latlng = mouseEvent.latLng;
+
+    marker.setPosition(latlng);
+    map.setCenter(latlng);
+
+    geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
+      if (status === kakao.maps.services.Status.OK) {
+        const address = result[0].address.address_name;
+        document.getElementById('roomFrom').value = address;
+      }
+    });
+  });
+
+  const ps = new kakao.maps.services.Places();
+
+  document.getElementById('roomFrom').addEventListener('keydown', function(e){
+    if(e.key !== 'Enter') return;
+
+    const keyword = this.value.trim();
+
+    if(!keyword) return;
+
+    ps.keywordSearch(keyword, function(data, status){
+      if(status === kakao.maps.services.Status.OK){
+        const place = data[0];
+        const coords = new kakao.maps.LatLng(place.y, place.x);
+
+        map.setCenter(coords);
+        marker.setPosition(coords);
+      }
+      else{
+        alert('출발지를 찾을 수 없습니다.');
+      }
+    });
+  });
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      const currentPos = new kakao.maps.LatLng(lat, lng);
+
+      map.setCenter(currentPos);
+      marker.setPosition(currentPos);
+
+      geocoder.coord2Address(lng, lat, function(result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+          const address = result[0].address.address_name;
+          document.getElementById('roomFrom').value = address;
+        }
+      });
+
+    }, function() {
+      console.log('현재 위치를 가져올 수 없습니다.');
+    });
+  }
 </script>
 </body>
 </html>
