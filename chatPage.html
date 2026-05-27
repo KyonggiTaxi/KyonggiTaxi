@@ -267,7 +267,7 @@
       .key.mascot {
             margin-left: 10px;
             background: transparent;
-            background-image: url(images/채팅기룡.png);
+            background-image: url(images/mascotHead.png);
             border: none;
             background-size: contain;
             background-repeat: no-repeat;
@@ -549,7 +549,7 @@
             position: absolute;
             inset: 0;
             background: rgba(0,0,0,0.35);
-            z-index: 20;
+            z-index: 100;
             border-radius: 15px;
             justify-content: center;
             align-items: center;
@@ -789,6 +789,17 @@
             <div class="popup-message" id="kickMessage">
                 강제 탈퇴 시킬까요?!
             </div>
+            <select id="kickSelect" onchange="currentKickTarget=this.value" style="
+                width: calc(100% - 30px);
+                margin: 0 15px 15px;
+                padding: 12px;
+                border-radius: 10px;
+                border: none;
+                font-size: 15px;
+                font-weight: 700;
+                color: #1e3a6e;
+                ">
+            </select>
             <div class="popup-buttons">
                 <button class="popup-btn back" onclick="closeKickPopup()">돌아가기</button>
                 <button class="popup-btn kick" onclick="doKick()">강제 탈퇴</button>
@@ -808,42 +819,91 @@
         </div>
     </div>
 
+    <div class="popup-overlay hidden" id="deleteOverlay">
+        <div class="choice-box">
+            <div class="choice-title">방을 삭제하시겠습니까?</div>
+            <div class="choice-subtitle">삭제하면 모든 인원이 퇴장됩니다.</div>
+            <div class="choice-buttons">
+            <button class="choice-btn chat" onclick="closeDeletePopup()">취소</button>
+            <button class="choice-btn lobby" onclick="confirmDeleteRoom()">삭제</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ── 방 정보 불러오기 ──
+        const store = {
+            get: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+            set: (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} },
+            remove: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+        };
         function loadRoomInfo() {
             const roomId = localStorage.getItem('currentRoomId');
-            const rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-            const room = rooms.find(r => String(r.id) === String(roomId));
-            if (room) {
+
+            onSnapshot(doc(db, "rooms", roomId), (docSnap) => {
+                if (!docSnap.exists()) {
+                alert('방이 삭제되었거나 존재하지 않습니다.');
+                window.location.href = 'mainPage.html';
+                return;
+                }
+
+                const room = {
+                id: docSnap.id,
+                ...docSnap.data()
+                };
+
+                window.currentRoom = room;
+
                 document.getElementById('chatRoomName').textContent = room.name || '방이름';
-                document.getElementById('chatRoomRoute').textContent = (room.from || '출발지') + ' → ' + (room.to || '도착지');
+                document.getElementById('chatRoomRoute').textContent =
+                (room.from || '출발지') + ' → ' + (room.to || '도착지');
+
                 const ah = document.getElementById('accountHint');
                 if (ah) ah.textContent = (room.bank || '') + ' ' + (room.account || '');
-                document.getElementById('chatRoomCount').textContent = '(' + (room.cur || 1) + '/' + (room.max || 4) + ')';
-                document.getElementById('chatRoomCount').style.fontSize = '17px';
-            }
-            const nickname = localStorage.getItem('nickname') || '';
-            const isHost = nickname === room.host;
-            const backBtn = document.querySelector('.back-btn');
-            const btnArea = document.getElementById('roomActionBtn');
-            if (btnArea) {
+
+                document.getElementById('chatRoomCount').textContent =
+                '(' + (room.cur || 1) + '/' + (room.max || 4) + ')';
+
+                const nickname = store.get('nickname') || '';
+                const isHost = nickname === room.host;
+                const btnArea = document.getElementById('roomActionBtn');
+
+                if (btnArea) {
                 btnArea.innerHTML = isHost
                     ? `<div style="display:flex; flex-direction:column; gap:6px;">
                         <button class="delete-btn" onclick="deleteRoom()">방 삭제</button>
                         <button class="delete-btn" onclick="openKickPopup()">강제 퇴출</button>
                     </div>`
                     : `<button class="leave-btn" onclick="leaveRoom()">나가기</button>`;
-            }
+                }
+            });
         }
-        loadRoomInfo();
 
         let currentKickTarget = null;
 
-        function openKickPopup(name) {
-            currentKickTarget = name;
-            document.getElementById('kickMessage').innerHTML =
-                `<strong>${name}</strong>을(를) 강제 탈퇴시킬까요?!`;
-            document.getElementById('kickOverlay').classList.remove('hidden');
+        function openKickPopup() {
+        const roomId = localStorage.getItem('currentRoomId');
+        const room = window.currentRoom;
+
+        const nickname = localStorage.getItem('nickname') || '';
+        const members = (room.members || []).filter(m => m !== nickname);
+
+        const select = document.getElementById('kickSelect');
+        select.innerHTML = '';
+
+        if (members.length === 0) {
+            select.innerHTML = '<option value="">퇴출할 택티가 없습니다</option>';
+        } else {
+            members.forEach(name => {
+            select.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+
+        currentKickTarget = members[0] || null;
+
+        document.getElementById('kickMessage').innerHTML =
+            `강제 탈퇴시킬 택티를 선택해주세요`;
+
+        document.getElementById('kickOverlay').classList.remove('hidden');
         }
 
         function closeKickPopup() {
@@ -851,8 +911,13 @@
             currentKickTarget = null;
         }
 
-        function doKick() {
-            if (!currentKickTarget) return;
+        async function doKick() {
+            currentKickTarget = document.getElementById('kickSelect').value;
+
+            if (!currentKickTarget) {
+                alert('퇴출할 택티가 없습니다.');
+                return;
+            }
             // 해당 유저의 메시지 그룹 제거
             const group = document.getElementById(`group-${currentKickTarget}`);
             if (group) group.remove();
@@ -867,6 +932,15 @@
             document.getElementById('kickedName').textContent = `${currentKickTarget}님이 퇴출되었습니다`;
             document.getElementById('kickOverlay').classList.add('hidden');
             document.getElementById('choiceOverlay').classList.remove('hidden');
+
+            const roomId = localStorage.getItem('currentRoomId');
+            const room = window.currentRoom;
+            const newMembers = (room.members || []).filter(m => m !== currentKickTarget);
+
+            await updateDoc(doc(db, "rooms", roomId), {
+                members: newMembers,
+                cur: Math.max(1, newMembers.length)
+            });
         }
 
         function goToChat() {
@@ -950,28 +1024,24 @@
                 document.getElementById('inputDisplay').textContent = currentText;
             }
         }
-        function deleteRoom() {
-            if (!confirm('방을 삭제하면 모든 인원이 퇴장됩니다. 삭제하시겠습니까?')) return;
-            const roomId = localStorage.getItem('currentRoomId');
-            let rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-            rooms = rooms.filter(r => String(r.id) !== String(roomId));
-            localStorage.setItem('rooms', JSON.stringify(rooms));
-            localStorage.removeItem('currentRoomId');
-            window.location.href = 'mainPage.html';
-        }
 
-        function leaveRoom() {
+        async function leaveRoom() {
             if (!confirm('방에서 나가시겠습니까?')) return;
-            const roomId = localStorage.getItem('currentRoomId');
-            const nickname = localStorage.getItem('nickname') || '';
-            let rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
-            const room = rooms.find(r => String(r.id) === String(roomId));
+
+            const roomId = store.get('currentRoomId');
+            const nickname = store.get('nickname') || '';
+            const room = window.currentRoom;
+
             if (room) {
-                room.members = (room.members || []).filter(m => m !== nickname);
-                room.cur = Math.max(1, (room.cur || 1) - 1);
-                localStorage.setItem('rooms', JSON.stringify(rooms));
+                const newMembers = (room.members || []).filter(m => m !== nickname);
+
+                await updateDoc(doc(db, "rooms", roomId), {
+                members: newMembers,
+                cur: Math.max(1, newMembers.length)
+                });
             }
-            localStorage.removeItem('currentRoomId');
+
+            try { store.remove('currentRoomId'); } catch(e) {}
             window.location.href = 'mainPage.html';
         }
 
@@ -985,6 +1055,61 @@
             el.style.overflow = routeExpanded ? 'visible' : 'hidden';
             el.style.textOverflow = routeExpanded ? 'unset' : 'ellipsis';
         }
+
+        function deleteRoom() {
+            document.getElementById('deleteOverlay').classList.remove('hidden');
+        }
+
+        async function confirmDeleteRoom() {
+            const roomId = store.get('currentRoomId');
+
+            await deleteDoc(doc(db, "rooms", roomId));
+
+            try { store.remove('currentRoomId'); } catch(e) {}
+            window.location.href = 'mainPage.html';
+        }
+
+        function closeDeletePopup() {
+            document.getElementById('deleteOverlay').classList.add('hidden');
+        }
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            getDocs,
+            onSnapshot,
+            doc,
+            deleteDoc,
+            updateDoc
+        } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDvFEypLTMRwfRMcnQaBQevFAKHMu-zsbc",
+            authDomain: "kyonggitaxi.firebaseapp.com",
+            projectId: "kyonggitaxi",
+            storageBucket: "kyonggitaxi.firebasestorage.app",
+            messagingSenderId: "518555765082",
+            appId: "1:518555765082:web:34eee83ec31369d00d0b63",
+            measurementId: "G-30G3VDXZVV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.onSnapshot = onSnapshot;
+        window.doc = doc;
+        window.deleteDoc = deleteDoc;
+        window.updateDoc = updateDoc;
+
+        loadRoomInfo();
     </script>
 </body>
 </html>
