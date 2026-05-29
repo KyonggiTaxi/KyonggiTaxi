@@ -312,6 +312,11 @@
       <div id="emptyMessage" class="empty-message">아직 대기 중인 택티가 없습니다 🚕</div>
     </div>
 
+    <!-- 택티 대기 메시지 -->
+    <div id="waitMsg" style="display:none; text-align:center; padding:14px; color:#8aafd6; font-size:14px; font-weight:600;">
+      ⏳ 택터의 수락을 기다리는 중...
+    </div>
+
     <!-- 하단 버튼 -->
     <div class="bottom-area">
       <button class="chat-btn" onclick="window.location.href='chatPage.html'">채 팅 방</button>
@@ -359,6 +364,22 @@
       const isHost = (store.get('nickname') || '') === room.host;
       document.querySelector('.chat-btn').style.display = isHost ? 'block' : 'none';
       document.querySelector('.confirm-btn').style.display = isHost ? 'block' : 'none';
+
+      // 택티: 수락 대기 메시지
+      const waitMsg = document.getElementById('waitMsg');
+      if (!isHost) {
+        if (waitMsg) waitMsg.style.display = 'block';
+      } else {
+        if (waitMsg) waitMsg.style.display = 'none';
+      }
+
+      // 택티: 수락되면 자동 이동
+      const nickname = store.get('nickname') || '';
+      const accepted = room.acceptedMembers || [];
+      if (!isHost && accepted.includes(nickname)) {
+        showToast('탑승이 확정됐습니다! 채팅방으로 이동합니다');
+        setTimeout(() => { window.location.href = 'chatPage.html'; }, 900);
+      }
     }
 
     function render() {
@@ -414,7 +435,8 @@
 
       await updateDoc(doc(db, "rooms", room.id), {
         members: newMembers,
-        cur: newMembers.length
+        cur: newMembers.length,
+        acceptedMembers: selected
       });
 
       try { store.set('currentRoomId', room.id); } catch(e) {}
