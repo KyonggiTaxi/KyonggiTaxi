@@ -398,7 +398,7 @@
             '<div class="avatar">' + personIcon + '</div>' +
             '<div class="user-name">' + u.id + '</div>' +
             (u.id === room.host ? '<span class="host-badge">택터</span>' : '') +
-            (isHost && !isSelf ? '<button type="button" class="check-btn ' + (u.checked ? 'on' : 'off') + '" onclick="toggle(event,' + i + ')">' + checkIcon + '</button>' : '');
+            ((store.get('nickname') === room.host) && !isSelf ? '<button type="button" class="check-btn ' + (u.checked ? 'on' : 'off') + '" onclick="toggle(event,' + i + ')">' + checkIcon + '</button>' : '');
       list.appendChild(row);
       });
     }
