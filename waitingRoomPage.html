@@ -441,10 +441,12 @@
         return;
       }
 
+      const filteredMembers = newMembers.filter(m => !selected.includes(m));
+
       await window.updateDoc(window.doc(window.db, "rooms", room.id), {
-        members: newMembers,
-        cur: newMembers.length,
-        acceptedMembers: selected
+          members: filteredMembers,
+          cur: filteredMembers.length,
+          acceptedMembers: selected
       });
 
       closeModal();
